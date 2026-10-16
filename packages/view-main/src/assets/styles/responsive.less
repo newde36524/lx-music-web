@@ -1,0 +1,72 @@
+@import './variables.less';
+
+/*
+  移动端 / 小屏适配的全局样式。
+
+  只放"页面级"的东西：视口高度、body 尺寸、触摸交互、滚动条等。
+  各组件内部的布局适配（播放栏、详情、表格列折叠等）写在组件自己的 <style> 里，
+  这样能正确落在组件的 scoped 作用域内，不用担心覆盖优先级。
+*/
+
+// 移动端的 100vh 包含浏览器地址栏的隐藏区域，页面底部会被吃掉一块
+@supports (height: 100dvh) {
+  html {
+    height: 100dvh;
+  }
+}
+
+// 触屏交互：去掉点击高亮与双击缩放（manipulation 仍保留双指缩放，不影响无障碍）
+@media (pointer: coarse) {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .scroll,
+  textarea {
+    -webkit-overflow-scrolling: touch;
+  }
+  // 禁止长按选择文字，但保留输入框的选择能力
+  * {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  input,
+  textarea,
+  [contenteditable="true"],
+  [contenteditable=""] {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
+  // 进度条 / 滑杆这类需要自己接管触摸手势的元素，交给各组件设置 touch-action
+}
+
+@media (max-width: @breakpoint-mobile) {
+  // Web 版在 JS 里把 body 固定成 1020px x 670px 的"假窗口"，这里必须强制铺满视口。
+  // 加 !important 是因为 body 上的是内联样式，普通样式表压不住。
+  html {
+    padding: 0 !important;
+    background: var(--color-content-background) !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overscroll-behavior: contain;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    position: static !important;
+    width: 100% !important;
+    height: 100% !important;
+    left: auto !important;
+    top: auto !important;
+  }
+  #root {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  // 表格类列表：横向滚动而不是挤压到不可读
+  table {
+    font-size: 0.85em;
+  }
+}
