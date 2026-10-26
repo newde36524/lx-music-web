@@ -44,6 +44,20 @@ declare namespace AnyListen {
       getDownloadList: () => Download.ListItem[]
       downloadAction: (action: ActionList) => void
       getSavePathStatus: () => SavePathStatus
+      /**
+       * 浏览器直存模式下，获取用于嵌入元数据的数据。
+       * 服务端负责获取歌词，封面 URL 直接返回，浏览器侧再下载封面并嵌入。
+       */
+      getEmbedData: (musicInfo: Music.MusicInfoOnline) => Promise<{
+        coverUrl: string | null
+        lyric: string | null
+        title: string
+        artist: string
+        album: string
+        year?: number
+        trackNo?: number | null
+        discNo?: number | null
+      }>
     }>
     type ServerIPCActions<Socket = undefined> = IPC.WarpIPCHandlerActions<Socket, ServerActions>
 

@@ -1,6 +1,6 @@
 {
   "name": "desktop",
-  "version": "0.10.0-beta.1",
+  "version": "0.10.0-beta.3",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/any-listen/any-listen-desktop.git"
@@ -50,11 +50,11 @@
   "devDependencies": {
     "@any-listen/eslint": "workspace:@shared/eslint@*",
     "@any-listen/types": "workspace:@shared/types@*",
-    "electron": "42.11.11",
+    "electron": "42.11.14",
     "electron-builder": "26.15.3",
     "electron-debug": "^4.1.0",
-    "electron-to-chromium": "^1.5.448",
+    "electron-to-chromium": "^1.5.456",
     "tar": "^7.5.22",
-    "vite": "^8.3.3"
+    "vite": "^8.3.4"
   }
 }

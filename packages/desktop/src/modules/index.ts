@@ -32,6 +32,7 @@ export const initModules = async () => {
       fallbackSavePath: appState.dataPath,
       addMusicLocationType: appState.appSetting['list.addMusicLocationType'],
       proxy: appState.proxy,
+      embedMetadata: appState.appSetting['download.embedMetadata'],
     })),
     initMusicList(),
     initAppMenu(),

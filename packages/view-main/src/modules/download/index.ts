@@ -1,6 +1,6 @@
 import { DOWNLOAD_STATUS, QUALITYS } from '@any-listen/common/constants'
 import { buildMusicCacheId, buildMusicName, getFileType } from '@any-listen/common/tools'
-import { buildUrl } from '@any-listen/web'
+import { buildUrl, createTaggedBlob } from '@any-listen/web'
 
 import { showDownloadQualityModal } from '@/components/apis/downloadQualityModal'
 import { hideNotify, showNotify, updateNotify } from '@/components/apis/notify'
@@ -16,7 +16,7 @@ import {
   startDownloadProgress,
   updateDownloadProgress,
 } from './progress/store.svelte'
-import { getSavePathStatus, sendDownloadAction } from '../../shared/ipc/download'
+import { getEmbedData, getSavePathStatus, sendDownloadAction } from '../../shared/ipc/download'
 import { downloadEventIPC } from '../../shared/ipc/download/event'
 import {
   addBrowserDownload,
@@ -346,8 +346,52 @@ const downloadWithBrowser = async (infos: Array<{ musicInfo: AnyListen.Music.Mus
       // 最终更新一次进度到 100%
       updateDownloadProgress(100, '')
 
+      // 嵌入元数据（封面 + 歌词）到内存中的文件数据
+      let blob: Blob
+      const embedEnabled = true
+      if (embedEnabled) {
+        try {
+          console.log('[download] getEmbedData called for:', info.musicInfo.name)
+          const embedData = await getEmbedData(info.musicInfo)
+          console.log('[download] embedData:', {
+            coverUrl: embedData.coverUrl ? 'yes' : 'no',
+            title: embedData.title || '(empty)',
+            artist: embedData.artist || '(empty)',
+            album: embedData.album || '(empty)',
+            lyric: embedData.lyric ? `${embedData.lyric.length} chars` : 'none',
+          })
+          let picture: Uint8Array | null = null
+          if (embedData.coverUrl) {
+            const coverUrl = buildUrl(embedData.coverUrl, true, appState.proxyServerHost)
+            console.log('[download] fetching cover:', coverUrl)
+            const coverResponse = await fetch(coverUrl)
+            if (coverResponse.ok) {
+              picture = new Uint8Array(await coverResponse.arrayBuffer())
+              console.log('[download] cover fetched, size:', picture.length)
+            } else {
+              console.warn('[download] cover fetch failed:', coverResponse.status)
+            }
+          }
+          blob = await createTaggedBlob(chunks, ext, {
+            title: embedData.title,
+            artist: embedData.artist,
+            album: embedData.album,
+            year: embedData.year,
+            trackNo: embedData.trackNo,
+            discNo: embedData.discNo,
+            picture,
+            lyric: embedData.lyric,
+          })
+          console.log('[download] createTaggedBlob done, blob size:', blob.size)
+        } catch (err) {
+          console.error('Embed metadata failed, using raw file:', err instanceof Error ? err.message : err)
+          blob = new Blob(chunks as BlobPart[])
+        }
+      } else {
+        blob = new Blob(chunks as BlobPart[])
+      }
+
       // 下载完成，创建 Blob URL 并显示完成状态
-      const blob = new Blob(chunks as BlobPart[])
       const blobUrl = URL.createObjectURL(blob)
       completeDownloadProgress(blobUrl)
 

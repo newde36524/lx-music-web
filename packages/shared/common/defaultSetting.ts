@@ -16,7 +16,7 @@ const defaultSetting: AnyListen.AppSetting = {
   'common.enableTrash': true,
   'common.enableDebug': false,
 
-  'player.startupAutoPlay': false,
+  'player.startupAutoPlay': true,
   'player.togglePlayMethod': 'listLoop',
   'player.playQuality': '128k',
   'player.isShowTaskProgess': true,
@@ -60,10 +60,10 @@ const defaultSetting: AnyListen.AppSetting = {
   'player.ignoreLocalLyrics': false,
 
   'playDetail.isZoomActiveLrc': true,
-  'playDetail.style.fontSize': 100,
+  'playDetail.style.fontSize': 80,
   'playDetail.style.align': 'left',
-  'playDetail.style.fontWeight': true,
-  'playDetail.isDelayScroll': true,
+  'playDetail.style.fontWeight': false,
+  'playDetail.isDelayScroll': false,
   'playDetail.isDynamicBackground': true,
   'playDetail.coverStyle': 'cd',
 
@@ -133,6 +133,7 @@ const defaultSetting: AnyListen.AppSetting = {
   'download.mode': 'server',
   'download.savePath': '',
   'download.fileName': '%name% - %singer%',
+  'download.embedMetadata': true,
 
   'onlineResource.enable': false,
   'onlineResource.tipSearchSource': '',

@@ -24,5 +24,8 @@ export const createClientDownload = (main: MainCall) => {
     async downloadAction(action) {
       return main.downloadAction(action)
     },
+    async getEmbedData(musicInfo) {
+      return main.getEmbedData(musicInfo)
+    },
   } satisfies Partial<AnyListen.IPC.ServerIPC>
 }

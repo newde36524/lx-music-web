@@ -13,9 +13,12 @@ export const initPlayList = (list: AnyListen.Player.PlayMusicInfo[]) => {
 
 export {
   setPlayHistoryList as initPlayHistoryList,
+  initPlayInfo,
   setDislikeIds,
+  setInited,
   setIsLinkedList,
   setMaxPlayTime,
+  setMusicInfo,
   setNowPlayTime,
   setPlayerPlaying,
   setPlayListId,
@@ -24,10 +27,7 @@ export {
   setVolumeMute as setStateVolumeMute,
   setStatusText,
   updatePlayHistoryIndex,
-  setMusicInfo,
   updatePlayIndex,
-  initPlayInfo,
-  setInited,
 } from './commit'
 
 export {
@@ -51,6 +51,7 @@ export {
 } from './playerRemoteAction'
 
 export {
+  checkCollectMusic,
   collectMusic,
   dislikeMusic,
   pause,
@@ -73,7 +74,6 @@ export {
   stop,
   togglePlay,
   uncollectMusic,
-  checkCollectMusic,
 } from './playerActions'
 
 export const addPlayLaterMusic = async (
@@ -95,7 +95,13 @@ export const addPlayLaterMusic = async (
         unsub()
       }
     })
-    void addPlayListMusic({ musics: list, pos: isTop ? 0 : playerState.playList.findIndex((m) => m.playLater) + 1 })
+    let pos: number
+    if (isTop) pos = 0
+    else {
+      const lastIndex = playerState.playList.findIndex((m) => !m.playLater)
+      pos = lastIndex === -1 ? playerState.playList.length : lastIndex
+    }
+    void addPlayListMusic({ musics: list, pos })
   })
 }
 
@@ -106,9 +112,9 @@ export const sendCreatedEvent = () => {
 export {
   getHasMediaDevicePermission,
   getMediaDeviceIdSetting,
+  getMediaDevices,
   saveMediaDeviceIdSetting,
   setHasMediaDevicePermission,
-  getMediaDevices,
 } from './mediaDevice'
 
 export const showMusicComment = async () => {

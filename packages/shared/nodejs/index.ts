@@ -303,6 +303,9 @@ export const safeResolve = async (root: string, userInput: string) => {
   return realPath
 }
 
+export { downloadCoverImage, isSupportedAudioFile, writeFileTags, type FileTags } from './music-tag'
+export { writeFlacTags } from './flac-tag'
+
 export const normalizePath = (userInput: string) => {
   if (typeof userInput !== 'string' || !userInput) {
     throw new Error('Invalid input')

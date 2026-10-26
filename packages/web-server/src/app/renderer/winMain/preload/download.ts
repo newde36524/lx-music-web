@@ -26,5 +26,8 @@ export const createClientDownload = (ipcSocket: IPCSocket) => {
     async downloadAction(action) {
       return ipcSocket.remoteQueueDownload.downloadAction(action)
     },
+    async getEmbedData(musicInfo) {
+      return ipcSocket.remoteQueueDownload.getEmbedData(musicInfo)
+    },
   } satisfies Partial<AnyListen.IPC.ServerIPC>
 }

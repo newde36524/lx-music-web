@@ -575,6 +575,11 @@ declare global {
       'download.fileName': '%name% - %singer%' | '%singer% - %name%' | '%name%'
 
       /**
+       * 下载完成后是否嵌入封面和歌词到 MP3 文件
+       */
+      'download.embedMetadata': boolean
+
+      /**
        * 是否启用在线资源板块
        */
       'onlineResource.enable': boolean

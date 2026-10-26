@@ -11,3 +11,7 @@ export const sendDownloadAction: AnyListen.IPC.ServerIPC['downloadAction'] = asy
 export const getSavePathStatus: AnyListen.IPC.ServerIPC['getSavePathStatus'] = async () => {
   return ipc.getSavePathStatus()
 }
+
+export const getEmbedData: AnyListen.IPC.ServerIPC['getEmbedData'] = async (musicInfo) => {
+  return ipc.getEmbedData(musicInfo)
+}

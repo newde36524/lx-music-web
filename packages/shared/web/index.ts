@@ -2,6 +2,8 @@ import { API_PREFIX, PROXY_URL_PATH } from '@any-listen/common/constants'
 import { buildRealPublicPath } from '@any-listen/common/tools'
 import { isUrl } from '@any-listen/common/utils'
 
+export * from './musicTag'
+
 export const onDomSizeChanged = (dom: HTMLElement, onChanged: (width: number, height: number) => void) => {
   // 使用 ResizeObserver 监听大小变化
   const resizeObserver = new ResizeObserver((entries) => {

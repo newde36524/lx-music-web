@@ -11,11 +11,14 @@ import {
 import { createDownload, type DownloaderType } from '@any-listen/nodejs/download'
 
 import { proxyServerState } from '../proxyServer'
+import { getMusicLyric } from '../resources/lyric'
+import { getMusicPic } from '../resources/musicPic'
 import { getMusicUrl } from '../resources/musicUrl'
 import { getDownloadFilePath } from '../worker/utilService/shared/music'
 import type { DBSeriveTypes } from '../worker/utils'
 
 import { downloadEvent } from './event'
+import { embedDownloadMetadata } from './embedMetadata'
 
 /** 并发下载上限 */
 const MAX_CONCURRENT = 3
@@ -77,6 +80,7 @@ export interface DownloadConfig {
   fallbackSavePath: string
   addMusicLocationType: AnyListen.AppSetting['list.addMusicLocationType']
   proxy: { host: string; port: string }
+  embedMetadata: boolean
 }
 
 let dbService: DBSeriveTypes
@@ -392,6 +396,7 @@ const downloadOne = async (id: string) => {
         },
         { action: 'complete' }
       )
+      void embedDownloadMetadata(task, config).catch(() => {})
       return
     } catch (err) {
       if (cancelIds.has(id)) return
@@ -538,4 +543,43 @@ const clearDownloadList = async () => {
   downloaders.clear()
   await dbService.downloadInfoClear()
   downloadEvent.list_changed()
+}
+
+/**
+ * 浏览器直存模式下，获取用于嵌入元数据的数据。
+ * 服务端负责获取歌词，封面 URL 直接返回，浏览器侧再下载封面并嵌入。
+ */
+export const getEmbedData = async (musicInfo: AnyListen.Music.MusicInfoOnline): Promise<{
+  coverUrl: string | null
+  lyric: string | null
+  title: string
+  artist: string
+  album: string
+  year?: number
+  trackNo?: number | null
+  discNo?: number | null
+}> => {
+  const lyricInfo = await getMusicLyric({ musicInfo }).catch(() => null)
+  const meta = musicInfo.meta ?? {}
+
+  // meta.picUrl 只有在播放器请求过封面后才设，下载时用扩展重新取
+  let coverUrl = meta.picUrl ?? null
+  if (!coverUrl) {
+    try {
+      coverUrl = await getMusicPic({ musicInfo })
+    } catch {
+      coverUrl = null
+    }
+  }
+
+  return {
+    coverUrl,
+    lyric: lyricInfo?.lyric ?? null,
+    title: musicInfo.name ?? '',
+    artist: musicInfo.singer ?? '',
+    album: meta.albumName ?? '',
+    year: meta.year,
+    trackNo: meta.trackNo,
+    discNo: meta.discNo,
+  }
 }

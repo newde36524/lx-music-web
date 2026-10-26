@@ -1,5 +1,6 @@
 import {
   getDownloadList,
+  getEmbedData,
   getSavePathStatus,
   onDownloadEvent,
   onDownloadListChanged,
@@ -21,6 +22,9 @@ export const createExposeDownload = () => {
     },
     async downloadAction(event, action) {
       return sendDownloadAction(action)
+    },
+    async getEmbedData(event, musicInfo: AnyListen.Music.MusicInfoOnline) {
+      return getEmbedData(musicInfo)
     },
   } satisfies Partial<ExposeClientFunctions>
 }

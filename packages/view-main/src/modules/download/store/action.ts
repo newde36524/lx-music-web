@@ -118,12 +118,12 @@ export const initDownloadList = async () => {
 export const refreshDownloadList = async () => {
   try {
     downloadListState.list = mergeTasks(await getDownloadList())
-    downloadListState.inited = true
   } catch (err) {
     // 取不到服务端列表时别把浏览器任务也一起清了
     downloadListState.list = mergeTasks([])
     console.error('Get download list failed:', err)
   }
+  downloadListState.inited = true
   downloadListEvent.emit()
 }
 

@@ -3,6 +3,7 @@
   "dependencies": {
     "@any-listen/common": "workspace:@shared/common@*",
     "@simonwep/pickr": "1.10.1",
+    "browser-id3-writer": "^6.4.0",
     "js-sha256": "^1.0.0"
   },
   "devDependencies": {
