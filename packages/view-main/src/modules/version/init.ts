@@ -1,6 +1,5 @@
 import { showSimpleModal } from '@/components/apis/dialog'
 import { showNotify } from '@/components/apis/notify'
-import { showUpdateModal } from '@/components/apis/updateModal'
 import { onConnected, onRelease } from '@/modules/app/shared'
 import { i18n } from '@/plugins/i18n'
 import { createUnsubscriptionSet } from '@/shared'
@@ -27,20 +26,19 @@ export const initVersion = () => {
           const latestVersion =
             newVersion?.beta && settingState.setting['common.allowPreRelease'] ? newVersion.beta[0].version : newVersion?.version
           if (latestVersion == ignoreVersion) return
-          void showUpdateModal()
+          // void showUpdateModal()
         })
       )
       subscriptions.add(
         versionEvent.on('downloaded', () => {
-          void showUpdateModal()
+          // void showUpdateModal()
         })
       )
       subscriptions.add(
         versionEvent.on('error', (preStatus, message) => {
           if (preStatus == 'downloading') {
+            // void showUpdateModal()
             const preTime = parseInt(getItem(LOCAL_STORE_KEYS.updateDownloadFailedTip) ?? '0')
-            showNotify(i18n.t('update_download_failed_tip', { msg: message }))
-            void showUpdateModal()
             if (Date.now() - preTime < 7 * 86400_000) return
             setTimeout(() => {
               void showSimpleModal(i18n.t('update_failed_tip')).finally(() => {
