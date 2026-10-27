@@ -143,6 +143,12 @@ export const buildConfig = (target, port = 9300, ipcScript) => {
       },
     },
     css: {
+      // Vite 默认把 less/scss/sass/styl 放进 worker 池编译，worker 间用
+      // Atomics.wait 锁（5s 超时）+ eventLoopUtilization 判定是否卡死。QEMU 模拟下
+      // （buildx 交叉构建非本机架构）utilization 失真，会把一个正常在编译的 less
+      // 误判成锁超时，抛 `[less] timed-out`。设 0 让 CSS 预处理器直接在主线程跑
+      // （FakeWorker），完全绕开 worker 锁，不再误报。只影响构建速度，不影响产物。
+      preprocessorMaxWorkers: 0,
       preprocessorOptions: {
         less: {
           ...lessConfig,
