@@ -1,3 +1,12 @@
 **/node_modules/
 build/
 
+# 构建用不到，别进 build context
+.git/
+.github/
+.vscode/
+docs/
+*.log
+
+# web-server 的本地运行数据（本地下载的音乐、sqlite 数据库、备份）
+packages/web-server/data/
