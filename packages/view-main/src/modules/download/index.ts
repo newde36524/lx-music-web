@@ -1,4 +1,4 @@
-import { DOWNLOAD_STATUS, QUALITYS } from '@any-listen/common/constants'
+import { DOWNLOAD_STATUS } from '@any-listen/common/constants'
 import { buildMusicCacheId, buildMusicName, getFileType } from '@any-listen/common/tools'
 import { buildUrl, createTaggedBlob } from '@any-listen/web'
 
@@ -8,6 +8,7 @@ import { i18n } from '@/plugins/i18n'
 import { sizeFormate } from '@/shared'
 
 import { appState } from '../app/store/state'
+import { getBestQuality } from '../player/utils/quality'
 import { settingState } from '../setting/store/state'
 import {
   beginDownloading,
@@ -51,10 +52,6 @@ export const retryDownload = (ids: string[]) => {
   originalRetryDownload(ids)
 }
 
-/**
- * 音质从高到低排。QUALITYS 是升序，反一下就是最高音质在前。
- */
-const QUALITYS_BEST_FIRST: AnyListen.Music.Quality[] = [...QUALITYS].reverse()
 /**
  * 下载进行中的通知不自动消失，给个足够长的兜底时间，正常会在完成/失败时手动关掉。
  */
@@ -131,11 +128,7 @@ export const initDownloadEvent = () => {
  * 没拿到音质信息时回落到播放器设置的音质。
  */
 const getDefaultQuality = (musicInfo: AnyListen.Music.MusicInfoOnline): string => {
-  const qualitys = musicInfo.meta.qualitys
-  if (qualitys) {
-    return QUALITYS_BEST_FIRST.find((quality) => !!qualitys[quality]) ?? settingState.setting['player.playQuality']
-  }
-  return settingState.setting['player.playQuality']
+  return getBestQuality(musicInfo)
 }
 
 /**

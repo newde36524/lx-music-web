@@ -18,7 +18,7 @@ const defaultSetting: AnyListen.AppSetting = {
 
   'player.startupAutoPlay': true,
   'player.togglePlayMethod': 'listLoop',
-  'player.playQuality': '128k',
+  'player.playQuality': 'highest',
   'player.isShowTaskProgess': true,
   'player.volume': 1,
   'player.isMute': false,

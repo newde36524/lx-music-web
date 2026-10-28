@@ -89,9 +89,9 @@ declare global {
       'player.togglePlayMethod': 'listLoop' | 'random' | 'list' | 'singleLoop' | 'none'
 
       /**
-       * 优先播放的音质
+       * 优先播放的音质；'highest' 表示默认选择当前歌曲可用的最高音质
        */
-      'player.playQuality': '128k' | '320k' | 'flac' | 'flac24bit'
+      'player.playQuality': '128k' | '320k' | 'flac' | 'flac24bit' | 'dolby' | 'master' | 'highest'
 
       /**
        * 是否显示任务栏进度条

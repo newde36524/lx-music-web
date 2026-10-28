@@ -720,6 +720,7 @@
   "settings.player.media_device_permission_tip": "在瀏覽器中，需要授予麥克風權限才能取得輸出裝置列表",
   "settings.player.media_session_lyric": "顯示媒體控制界面歌詞",
   "settings.player.music_quality": "優先播放的音質",
+  "settings.player.music_quality_highest": "最高",
   "settings.player.music_quality_128k": "128K",
   "settings.player.music_quality_192k": "192K",
   "settings.player.music_quality_320k": "320K",

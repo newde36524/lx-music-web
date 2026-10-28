@@ -720,6 +720,7 @@
   "settings.player.media_device_permission_tip": "In the browser, you need to grant microphone permission to get the output device list",
   "settings.player.media_session_lyric": "Show media control interface lyrics",
   "settings.player.music_quality": "Prioritize playback sound quality",
+  "settings.player.music_quality_highest": "Highest",
   "settings.player.music_quality_128k": "128K",
   "settings.player.music_quality_192k": "192K",
   "settings.player.music_quality_320k": "320K",

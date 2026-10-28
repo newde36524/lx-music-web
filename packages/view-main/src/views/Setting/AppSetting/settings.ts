@@ -243,14 +243,17 @@ export const settings: SettingListSection[] = [
         field: 'player.playQuality',
         name: 'settings.player.music_quality',
         type: 'radio',
-        enum: (
-          ['128k', '320k', 'flac', 'flac24bit', 'dolby', 'master'] satisfies Array<
-            Exclude<AnyListen.Music.Quality, 'wav' | '192k'>
-          >
-        ).map((l) => ({
-          value: l,
-          name: `settings.player.music_quality_${l}`,
-        })),
+        enum: [
+          { value: 'highest', name: 'settings.player.music_quality_highest' },
+          ...(
+            ['128k', '320k', 'flac', 'flac24bit', 'dolby', 'master'] satisfies Array<
+              Exclude<AnyListen.Music.Quality, 'wav' | '192k'>
+            >
+          ).map((l) => ({
+            value: l,
+            name: `settings.player.music_quality_${l}` as keyof Message,
+          })),
+        ],
       },
       {
         name: 'settings.player.media_device',

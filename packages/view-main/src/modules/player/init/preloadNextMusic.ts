@@ -12,6 +12,7 @@ import { playerEvent } from '../store/event'
 import { getNextPlayMusicInfo, resetRandomNextMusicInfo } from '../store/playerActions'
 import { getMusicUrl } from '../store/playerRemoteAction'
 import { playerState } from '../store/state'
+import { getPlayQuality } from '../utils/quality'
 
 let audio: HTMLAudioElement
 const PRELOAD_TIME = 15
@@ -75,12 +76,18 @@ const preloadNextMusicUrl = async (curTime: number) => {
   const info = await getNextPlayMusicInfo()
   if (info) {
     preloadMusicInfo.info = info
-    const { url } = await getMusicUrl({ musicInfo: info.musicInfo }).catch(() => ({ url: '' }))
+    const { url } = await getMusicUrl({ musicInfo: info.musicInfo, quality: getPlayQuality(info.musicInfo) }).catch(
+      () => ({ url: '' })
+    )
     if (url) {
       console.log('preload url', url)
       const result = await checkMusicUrl(url)
       if (!result) {
-        const { url } = await getMusicUrl({ musicInfo: info.musicInfo, isRefresh: true }).catch(() => ({ url: '' }))
+        const { url } = await getMusicUrl({
+          musicInfo: info.musicInfo,
+          isRefresh: true,
+          quality: getPlayQuality(info.musicInfo),
+        }).catch(() => ({ url: '' }))
         void checkMusicUrl(url)
         console.log('preload url refresh', url)
       }

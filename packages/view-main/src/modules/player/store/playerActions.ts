@@ -23,6 +23,7 @@ import { i18n } from '@/plugins/i18n'
 import { getSrc, isEmpty, releasePlayer, setPause, setPlay, setResource, setStop } from '@/plugins/player'
 import { parseInterval } from '@/shared'
 
+import { getPlayQuality } from '../utils/quality'
 import * as commit from './commit'
 import { playerEvent } from './event'
 import { setPlayListMusic, setPlayListMusicPlayed, setPlayListMusicUnplayedAll } from './listRemoteAction'
@@ -105,7 +106,8 @@ const getMusicPlayUrl = async (
 
   // const type = getPlayType(settingState.setting['player.playQuality'], musicInfo)
 
-  return getMusicUrl({ musicInfo, isRefresh })
+  // 默认（'highest'）时解析成当前歌曲可用的最高音质，否则用用户设置的音质
+  return getMusicUrl({ musicInfo, isRefresh, quality: getPlayQuality(musicInfo) })
     .then((urlInfo) => {
       console.log('url', urlInfo.url)
       if (diffCurrentMusicInfo(musicInfo)) return null

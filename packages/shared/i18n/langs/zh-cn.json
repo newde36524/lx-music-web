@@ -719,6 +719,7 @@
   "settings.player.media_device_permission_tip": "在浏览器中，需要授予麦克风权限才能获取输出设备列表",
   "settings.player.media_session_lyric": "显示媒体控制界面歌词",
   "settings.player.music_quality": "优先播放的音质",
+  "settings.player.music_quality_highest": "最高",
   "settings.player.music_quality_128k": "128K",
   "settings.player.music_quality_192k": "192K",
   "settings.player.music_quality_320k": "320K",
