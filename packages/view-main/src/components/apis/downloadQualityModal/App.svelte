@@ -123,9 +123,7 @@
       <h2>{$t('user_list_music_menu__download_quality')}</h2>
       <p class="name">{musicInfo.singer ? `${musicInfo.name} - ${musicInfo.singer}` : musicInfo.name}</p>
       <div class="scroll content">
-        {#if checkingFormat}
-          <p class="empty">{$t('download.quality.checking')}</p>
-        {:else if qualities.length}
+        {#if qualities.length}
           {#each qualities as quality (quality.quality)}
             <Btn
               class={current == quality.quality ? [] : ['outline']}
@@ -144,7 +142,7 @@
         {/if}
         <div class="btns">
           <Btn outline onclick={handleCancel}>{$t('btn_cancel')}</Btn>
-          <Btn disabled={!current || checkingFormat} onclick={handleOk}>{$t('btn_confirm')}</Btn>
+          <Btn disabled={!current} onclick={handleOk}>{$t('btn_confirm')}</Btn>
         </div>
       </div>
     </main>

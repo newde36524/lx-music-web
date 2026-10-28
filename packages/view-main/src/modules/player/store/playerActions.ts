@@ -23,7 +23,7 @@ import { i18n } from '@/plugins/i18n'
 import { getSrc, isEmpty, releasePlayer, setPause, setPlay, setResource, setStop } from '@/plugins/player'
 import { parseInterval } from '@/shared'
 
-import { getPlayQuality } from '../utils/quality'
+import { getLowerQuality, getPlayQuality } from '../utils/quality'
 import * as commit from './commit'
 import { playerEvent } from './event'
 import { setPlayListMusic, setPlayListMusicPlayed, setPlayListMusicUnplayedAll } from './listRemoteAction'
@@ -98,7 +98,8 @@ const diffCurrentMusicInfo = (curMusicInfo: AnyListen.Music.MusicInfo): boolean 
 const getMusicPlayUrl = async (
   musicInfo: AnyListen.Music.MusicInfo,
   isRefresh = false,
-  isRetryed = false
+  isRetryed = false,
+  quality: AnyListen.Music.Quality = getPlayQuality(musicInfo)
 ): Promise<AnyListen.IPCMusic.MusicUrlInfo | null> => {
   // this.musicInfo.url = await getMusicPlayUrl(targetSong, type)
   commit.setStatusText(i18n.t('player__geting_url'))
@@ -107,7 +108,7 @@ const getMusicPlayUrl = async (
   // const type = getPlayType(settingState.setting['player.playQuality'], musicInfo)
 
   // 默认（'highest'）时解析成当前歌曲可用的最高音质，否则用用户设置的音质
-  return getMusicUrl({ musicInfo, isRefresh, quality: getPlayQuality(musicInfo) })
+  return getMusicUrl({ musicInfo, isRefresh, quality })
     .then((urlInfo) => {
       console.log('url', urlInfo.url)
       if (diffCurrentMusicInfo(musicInfo)) return null
@@ -122,7 +123,12 @@ const getMusicPlayUrl = async (
 
       // if (err.message == requestMsg.tooManyRequests) return delayRetry(musicInfo, isRefresh)
 
-      if (!isRetryed) return getMusicPlayUrl(musicInfo, isRefresh, true)
+      // 首次失败：同音质重试一次（可能是瞬时错误）
+      if (!isRetryed) return getMusicPlayUrl(musicInfo, isRefresh, true, quality)
+
+      // 重试后仍失败：该音质取不到 URL（如最高音质需要 VIP），降级到较低音质继续尝试
+      const lowerQuality = getLowerQuality(quality)
+      if (lowerQuality) return getMusicPlayUrl(musicInfo, isRefresh, true, lowerQuality)
 
       throw err
     })

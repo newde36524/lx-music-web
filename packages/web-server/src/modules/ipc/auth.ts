@@ -8,12 +8,7 @@ import { IPC_CODE, PROXY_URL_KEY_COOKIE_NAME } from '@any-listen/common/constant
 import { checkClientInfo, createClientInfo, getServerName, getTokenSecret, saveClientInfo, updateLastActive } from '@/shared/data'
 import { toSha256 } from '@/shared/utils'
 
-import store from './cache'
 import { createToken, getIP, verifyToken } from './tools'
-
-const getAvailableIP = (ip: string) => {
-  return ip && (store.get<number>(ip) ?? 0) < 10 ? ip : null
-}
 
 const verifyByKey = async (token: string, ip: string, userAgent: string) => {
   const result = await verifyToken(token, getTokenSecret()).catch(() => null)
@@ -42,7 +37,8 @@ export const authCode = async (ctx: AnyListen.RequestContext, pwd: string) => {
   let code = 401
   let msg: string = IPC_CODE.msgAuthFailed
 
-  let ip = getAvailableIP(ctx.userIp)
+  // 已取消 IP 封禁（不再累计失败次数、不再按 IP 拉黑）
+  const ip = ctx.userIp
   if (ip) {
     const key = ctx.headers.m
     if (typeof key == 'string' && key && key.length < 4096) {
@@ -71,17 +67,6 @@ export const authCode = async (ctx: AnyListen.RequestContext, pwd: string) => {
         }
       }
     }
-
-    if (code == 200) {
-      if (store.has(ip)) store.delete(ip)
-    } else {
-      const num = store.get<number>(ip) ?? 0
-      // if (num > 20) return
-      store.set(ip, num + 1)
-    }
-  } else {
-    code = 403
-    msg = IPC_CODE.msgBlockedIp
   }
   // console.log(req.headers)
 
@@ -90,8 +75,7 @@ export const authCode = async (ctx: AnyListen.RequestContext, pwd: string) => {
 }
 
 export const authConnect = async (req: http.IncomingMessage) => {
-  let ip: string | null | undefined = getIP(req)
-  ip &&= getAvailableIP(ip)
+  const ip = getIP(req)
   if (ip) {
     const query = querystring.parse(req.url!.split('?')[1])
     // const i = query.i
@@ -100,9 +84,6 @@ export const authConnect = async (req: http.IncomingMessage) => {
       const keyInfo = await verifyByKey(token, ip, req.headers['user-agent'] ?? '')
       if (keyInfo) return keyInfo
     }
-
-    const num = store.get<number>(ip) ?? 0
-    store.set(ip, num + 1)
   }
   throw new Error('failed')
 }

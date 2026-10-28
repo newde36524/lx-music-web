@@ -30,3 +30,13 @@ export const getPlayQuality = (musicInfo: AnyListen.Music.MusicInfo): AnyListen.
   if (playQuality !== 'highest') return playQuality
   return getBestQuality(musicInfo)
 }
+
+/**
+ * 取比指定音质低一档的音质（用于最高音质取不到 URL 时降级重试）。
+ * 已经是兜底音质（最低）时返回 null，表示没有更低的音质可试了。
+ */
+export const getLowerQuality = (quality: AnyListen.Music.Quality): AnyListen.Music.Quality | null => {
+  const index = QUALITYS_BEST_FIRST.indexOf(quality)
+  if (index < 0) return FALLBACK_QUALITY
+  return QUALITYS_BEST_FIRST[index + 1] ?? null
+}
