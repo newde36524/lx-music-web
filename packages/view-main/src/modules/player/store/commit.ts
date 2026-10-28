@@ -118,6 +118,12 @@ export const setStatusText = (statusText: string) => {
   playerEvent.statusTextChanged(statusText)
 }
 
+export const setQuality = (quality: AnyListen.Music.Quality | null) => {
+  if (playerState.quality == quality) return
+  playerState.quality = quality
+  playerEvent.qualityChanged(quality)
+}
+
 export const setNowPlayTime = (time: number) => {
   const oldProgress = { ...playerState.progress }
   playerState.progress.nowPlayTime = time

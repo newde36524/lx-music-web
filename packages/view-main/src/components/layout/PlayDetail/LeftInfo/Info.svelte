@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { musicInfo } from '@/modules/player/reactive.svelte'
-  import { t } from '@/plugins/i18n'
+  import { musicInfo, quality } from '@/modules/player/reactive.svelte'
+  import { t, type Message } from '@/plugins/i18n'
+
+  const qualityLabel = $derived($quality ? $t(`settings.player.music_quality_${$quality}` as keyof Message) : '')
 </script>
 
 <div class="scroll info">
@@ -8,6 +10,9 @@
   <p><span>{$t('play_detail.music_singer')}</span>{$musicInfo.singer}</p>
   {#if $musicInfo.album}
     <p><span>{$t('play_detail.music_album')}</span>{$musicInfo.album}</p>
+  {/if}
+  {#if qualityLabel}
+    <p><span>{$t('play_detail.music_quality')}</span>{qualityLabel}</p>
   {/if}
 </div>
 

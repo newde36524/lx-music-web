@@ -408,6 +408,7 @@
   "play_detail.hide_tip": "隱藏詳情頁（界面內右鍵雙擊可快速隱藏詳情頁）",
   "play_detail.music_album": "專輯名：",
   "play_detail.music_name": "歌曲名：",
+  "play_detail.music_quality": "音質：",
   "play_detail.music_singer": "藝術家：",
   "play_random": "隨機播放",
   "player.desktop_lyric_lock": "右擊鎖定歌詞",

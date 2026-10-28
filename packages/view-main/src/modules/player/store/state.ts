@@ -15,6 +15,7 @@ export interface InitState {
     nowPlayTimeStr: string
     maxPlayTimeStr: string
   }
+  quality: AnyListen.Music.Quality | null
   playList: AnyListen.Player.PlayMusicInfo[]
   volume: number
   volumeMute: boolean
@@ -62,6 +63,7 @@ export const playerState: InitState = {
     nowPlayTimeStr: '00:00',
     maxPlayTimeStr: '00:00',
   },
+  quality: null,
   playList: [],
   volume: 0,
   volumeMute: false,

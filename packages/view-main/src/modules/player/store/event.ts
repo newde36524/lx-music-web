@@ -19,6 +19,10 @@ class Event extends _Event {
     this.emitEvent('setProgress', time, maxTime)
   }
 
+  setLyricTime(time: number) {
+    this.emitEvent('setLyricTime', time)
+  }
+
   setPlaybackRate(rate: number) {
     this.emitEvent('setPlaybackRate', rate)
   }
@@ -79,6 +83,10 @@ class Event extends _Event {
 
   statusTextChanged(text: InitState['statusText']) {
     this.emitEvent('statusTextChanged', text)
+  }
+
+  qualityChanged(quality: InitState['quality']) {
+    this.emitEvent('qualityChanged', quality)
   }
 
   titleChanged(text: InitState['title']) {

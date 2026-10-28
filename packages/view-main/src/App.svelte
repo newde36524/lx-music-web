@@ -29,6 +29,14 @@
       }
     }
     document.addEventListener('touchmove', preventSwipe, { passive: false })
+
+    // 禁用移动端双击 / 双指缩放页面（iOS Safari 的 gesture 事件，配合 viewport 的 user-scalable=no）
+    const preventGesture = (e: Event) => {
+      e.preventDefault()
+    }
+    document.addEventListener('gesturestart', preventGesture, { passive: false })
+    document.addEventListener('gesturechange', preventGesture, { passive: false })
+    document.addEventListener('gestureend', preventGesture, { passive: false })
   })
 </script>
 

@@ -59,6 +59,9 @@ export const getDisabledAutoPauseSize = () => {
 export const play = (currentTime: number) => {
   lrc?.play(currentTime)
 }
+export const setTime = (currentTime: number) => {
+  lrc?.setTime(currentTime)
+}
 export const pause = () => {
   lrc?.pause()
 }

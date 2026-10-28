@@ -15,6 +15,8 @@
   import MusicHeartBtn from '@/components/common/MusicHeartBtn.svelte'
   import { useIsTouch } from '@/shared/browser/mobile.svelte'
   import { longpress } from '@/shared/browser/longpress'
+  import { togglePlay } from '@/modules/player/store/actions'
+  import { playerPlaying } from '@/modules/player/reactive.svelte'
   import { LIST_IDS } from '@any-listen/common/constants'
   // console.log(querystring)
   let {
@@ -62,6 +64,18 @@
       onclick(false)
     }
   }
+
+  // 播放按钮：当前正在播放/暂停的这首歌时切换播放状态，否则播放该曲
+  const handlePlayBtn = (evt: MouseEvent) => {
+    evt.stopPropagation()
+    if (playing) {
+      void togglePlay()
+    } else {
+      onplay?.()
+    }
+  }
+  // 当前行是正在播放的歌曲且音频在出声时显示暂停图标，否则显示播放图标
+  const isPlayingRow = $derived(!!playing && $playerPlaying)
 
   let cancelLoadPic: (() => void) | undefined = undefined
   let retryedLoadPic = false
@@ -135,17 +149,14 @@
         {#if hovered || isTouch}
           <div class="auto-hide-btns" transition:fade={{ duration: 200 }}>
             <Btn
-              onclick={(evt) => {
-                evt.stopPropagation()
-                onplay?.()
-              }}
+              onclick={handlePlayBtn}
               min
               icon
               outline
-              aria-label={$t('player__play')}
+              aria-label={isPlayingRow ? $t('player__pause') : $t('player__play')}
               class={['play-btn']}
             >
-              <SvgIcon name="play" />
+              <SvgIcon name={isPlayingRow ? 'pause' : 'play'} />
             </Btn>
           </div>
         {/if}

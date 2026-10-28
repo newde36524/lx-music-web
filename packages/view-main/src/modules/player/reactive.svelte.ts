@@ -51,6 +51,18 @@ export const statusText = readable(playerState.statusText, (set) => {
   }
 })
 
+export const quality = readable(playerState.quality, (set) => {
+  const handleUpdate = () => {
+    set(playerState.quality)
+  }
+  handleUpdate()
+  playerEvent.on('qualityChanged', handleUpdate)
+
+  return function stop() {
+    playerEvent.off('qualityChanged', handleUpdate)
+  }
+})
+
 export const playing = readable(playerState.playing, (set) => {
   const handleUpdate = () => {
     set(playerState.playing)

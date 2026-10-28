@@ -254,6 +254,14 @@ export const suspendAudioContext = async () => {
   console.log('AudioContext suspended to save CPU')
 }
 
+export const resumeAudioContext = async () => {
+  if (audioContext?.state !== 'suspended') return
+  await audioContext.resume().catch((err) => {
+    console.error('Resume audio context failed:', err)
+  })
+  console.log('AudioContext resumed')
+}
+
 export const getAudioContext = () => {
   return audioContext
 }

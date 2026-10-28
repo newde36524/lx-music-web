@@ -408,6 +408,7 @@
   "play_detail.hide_tip": "Hide the details page (right-click in the interface to quickly hide the details page)",
   "play_detail.music_album": "Album: ",
   "play_detail.music_name": "Song Name: ",
+  "play_detail.music_quality": "Quality: ",
   "play_detail.music_singer": "Artist: ",
   "play_random": "Shuffle",
   "player.desktop_lyric_lock": "Right-click to lock lyric window",

@@ -10,6 +10,7 @@ export {
   playIndex,
   playList,
   setLyricOffset,
+  setLyricTime,
   setPlaybackRate,
   collectMusic,
   uncollectMusic,

@@ -36,6 +36,10 @@
     if (progress > 1) progress = 1
     else if (progress < 0) progress = 0
     dragProgress = progress
+    // 拖动进度条时歌词实时同步到当前进度（秒 -> 毫秒）
+    if (playerState.progress.maxPlayTime) {
+      actions.exec('player.setLyricTime', dragProgress * playerState.progress.maxPlayTime * 1000)
+    }
   }
   const handleMsMove = (event: MouseEvent) => {
     if (!msEvent.isMsDown) return

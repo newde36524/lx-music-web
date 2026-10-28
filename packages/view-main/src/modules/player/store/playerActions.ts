@@ -98,7 +98,7 @@ const getMusicPlayUrl = async (
   musicInfo: AnyListen.Music.MusicInfo,
   isRefresh = false,
   isRetryed = false
-): Promise<string | null> => {
+): Promise<AnyListen.IPCMusic.MusicUrlInfo | null> => {
   // this.musicInfo.url = await getMusicPlayUrl(targetSong, type)
   commit.setStatusText(i18n.t('player__geting_url'))
   if (settingState.setting['player.autoSkipOnError']) addLoadTimeout()
@@ -106,11 +106,11 @@ const getMusicPlayUrl = async (
   // const type = getPlayType(settingState.setting['player.playQuality'], musicInfo)
 
   return getMusicUrl({ musicInfo, isRefresh })
-    .then(({ url }) => {
-      console.log('url', url)
+    .then((urlInfo) => {
+      console.log('url', urlInfo.url)
       if (diffCurrentMusicInfo(musicInfo)) return null
       // console.log(url)
-      return url
+      return urlInfo
     })
     .catch(async (err: Error) => {
       // console.log('err', err.message)
@@ -132,9 +132,10 @@ export const setMusicUrl = (musicInfo: AnyListen.Music.MusicInfo, isRefresh?: bo
   // if (cancelDelayRetry) cancelDelayRetry()
   gettingUrlId = musicInfo.id
   void getMusicPlayUrl(musicInfo, isRefresh)
-    .then((url) => {
-      if (!url) return
-      setResource(url)
+    .then((urlInfo) => {
+      if (!urlInfo) return
+      setResource(urlInfo.url)
+      if (urlInfo.quality) commit.setQuality(urlInfo.quality as AnyListen.Music.Quality)
     })
     .catch((err: Error) => {
       console.log(err)
@@ -812,6 +813,9 @@ export const dislikeMusic = async () => {
 
 export const seekTo = (time: number) => {
   playerEvent.setProgress(time)
+}
+export const setLyricTime = (time: number) => {
+  playerEvent.setLyricTime(time)
 }
 export const setLyricOffset = (offset: number) => {
   playerEvent.setLyricOffset(offset)

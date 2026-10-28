@@ -1,3 +1,5 @@
+import { onVisibilityChange } from '@any-listen/web'
+
 import { onRelease } from '@/modules/app/shared'
 import { playerEvent } from '@/modules/player/store/event'
 import { playerState } from '@/modules/player/store/state'
@@ -27,6 +29,27 @@ const pause = () => {
 
 const stop = () => {
   lyric.stop()
+}
+
+/**
+ * 拖动进度条时实时同步歌词到指定时间（毫秒）。
+ * 用 setTime 只做一次性定位（不推进），避免拖动过程中歌词继续走。
+ */
+const setLyricTime = (time: number) => {
+  if (!playerState.musicInfo.id) return
+  lyric.setTime(time)
+}
+
+/**
+ * seek 到指定时间（秒）后重同步歌词：播放中则继续推进，否则只定位。
+ */
+const setLyricProgress = (time: number) => {
+  if (!playerState.musicInfo.id) return
+  if (playerState.playerPlaying) {
+    lyric.play(time * 1000)
+  } else {
+    lyric.setTime(time * 1000)
+  }
 }
 
 const setLyricOffset = (offset: number) => {
@@ -97,6 +120,16 @@ export const initLyric = () => {
       subscriptions.add(playerEvent.on('pause', pause))
       subscriptions.add(playerEvent.on('stop', stop))
       subscriptions.add(playerEvent.on('error', pause))
+      subscriptions.add(playerEvent.on('setLyricTime', setLyricTime))
+      subscriptions.add(playerEvent.on('setProgress', setLyricProgress))
+      // 从其他页面/App 切回来时，若仍在播放，把歌词重新同步到音频当前进度，
+      // 避免后台期间（JS 定时器被冻结）歌词与音频脱节
+      subscriptions.add(
+        onVisibilityChange((hidden) => {
+          if (hidden) return
+          if (playerState.playerPlaying) setTimeout(play)
+        })
+      )
     })
   })
 }

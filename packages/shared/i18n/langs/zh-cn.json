@@ -408,6 +408,7 @@
   "play_detail.hide_tip": "隐藏详情页（界面内右键双击可快速隐藏详情页）",
   "play_detail.music_album": "专辑名：",
   "play_detail.music_name": "歌曲名：",
+  "play_detail.music_quality": "音质：",
   "play_detail.music_singer": "艺术家：",
   "play_random": "随机播放",
   "player.desktop_lyric_lock": "右击锁定歌词",

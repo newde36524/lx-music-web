@@ -64,6 +64,7 @@ export {
   seekTo,
   setCollectStatus,
   setLyricOffset,
+  setLyricTime,
   setMusicUrl,
   setPlaybackRate,
   setPlayMusicInfo,
