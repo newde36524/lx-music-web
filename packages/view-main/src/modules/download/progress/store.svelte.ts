@@ -61,7 +61,20 @@ export const updateDownloadProgress = (progress: number, speed: string) => {
 }
 
 /**
- * 完成下载，显示完成状态。
+ * 完成后自动关闭的定时器。移动端没有「点击完成」的习惯，
+ * 让弹窗自己消失，避免下载完还残留 loading 遮罩。
+ */
+let autoCloseTimer: ReturnType<typeof setTimeout> | null = null
+
+const clearAutoClose = () => {
+  if (autoCloseTimer) {
+    clearTimeout(autoCloseTimer)
+    autoCloseTimer = null
+  }
+}
+
+/**
+ * 完成下载，显示完成状态，稍后自动关闭。
  */
 export const completeDownloadProgress = (blobUrl: string) => {
   if (downloadProgressState.visible) {
@@ -70,6 +83,13 @@ export const completeDownloadProgress = (blobUrl: string) => {
     downloadProgressState.speed = ''
     downloadProgressState.blobUrl = blobUrl
   }
+  // 下载完成后自动收起弹窗，改成"不 loading"。留 2.5s 让用户看清完成态。
+  clearAutoClose()
+  autoCloseTimer = setTimeout(() => {
+    if (downloadProgressState.visible && downloadProgressState.status == 'completed') {
+      closeDownloadProgress()
+    }
+  }, 2500)
 }
 
 /**
@@ -86,6 +106,7 @@ export const failDownloadProgress = (errorMessage: string) => {
  * 关闭进度弹框。
  */
 export const closeDownloadProgress = () => {
+  clearAutoClose()
   if (downloadProgressState.blobUrl) {
     URL.revokeObjectURL(downloadProgressState.blobUrl)
   }
@@ -98,6 +119,7 @@ export const closeDownloadProgress = () => {
  * 取消下载。
  */
 export const cancelDownloadProgress = () => {
+  clearAutoClose()
   downloadProgressState.abortController?.abort()
   if (downloadProgressState.blobUrl) {
     URL.revokeObjectURL(downloadProgressState.blobUrl)

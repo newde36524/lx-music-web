@@ -101,7 +101,7 @@ export const canBrowserDownload = () =>
  * 从文件头判断实际格式。魔数比 URL 后缀可靠 —— 有些扩展在响应头 / 路径上都骗人，
  * 但文件内容骗不了。返回 null 表示头不够或者格式不识别，调用方按"无法判断"处理。
  */
-const detectFormatFromBytes = (bytes: Uint8Array): AnyListen.Music.FileType | null => {
+export const detectFormatFromBytes = (bytes: Uint8Array): AnyListen.Music.FileType | null => {
   if (bytes.length < 4) return null
   // FLAC: 'fLaC'
   if (bytes[0] == 0x66 && bytes[1] == 0x4c && bytes[2] == 0x61 && bytes[3] == 0x43) return 'flac'

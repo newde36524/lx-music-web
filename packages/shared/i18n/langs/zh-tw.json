@@ -90,6 +90,7 @@
   "download.browser.preparing": "準備中...",
   "download.browser.completed": "下載完成",
   "download.browser.failed": "下載失敗",
+  "download.browser.format_corrected": "「{name}」音源實際回傳 {actual} 格式，已依真實格式儲存",
   "download.cancel_all": "取消全部",
   "download.clear_completed": "清空已完成",
   "download.clear_completed_notify": "已清空已完成的下載記錄",

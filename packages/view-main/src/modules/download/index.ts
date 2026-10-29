@@ -25,6 +25,7 @@ import {
   browserTaskListChanged,
   browserTaskUpdated,
   canBrowserDownload,
+  detectFormatFromBytes,
   getBrowserDirInfo,
   registerBrowserTask,
 } from './browser'
@@ -217,10 +218,12 @@ const downloadWithBrowser = async (infos: Array<{ musicInfo: AnyListen.Music.Mus
   const extMap: Record<string, AnyListen.Download.FileExt> = { m4a: 'mp3' }
 
   for (const info of infos) {
-    const type = getFileType(info.quality)
-    const ext = extMap[type] ?? type
+    // type/ext/fileName 中途可能被真实格式修正（音源给假音质时魔数会揭穿），用 let 声明
+    let type = getFileType(info.quality)
+    let ext = extMap[type] ?? type
     const raw = buildMusicName(fileNameSetting, info.musicInfo.name, info.musicInfo.singer)
-    const fileName = `${raw.replace(/[\\/:*?"<>|\x00-\x1f]/g, '').replace(/[.\s]+$/g, '').trim() || info.musicInfo.name}.${ext}`
+    const rawBase = raw.replace(/[\\/:*?"<>|\x00-\x1f]/g, '').replace(/[.\s]+$/g, '').trim() || info.musicInfo.name
+    let fileName = `${rawBase}.${ext}`
     const taskId = buildMusicCacheId(info.musicInfo, info.quality)
 
     // 创建下载记录
@@ -245,6 +248,29 @@ const downloadWithBrowser = async (infos: Array<{ musicInfo: AnyListen.Music.Mus
       },
     }
 
+    // 辅助函数：同时更新内存和 IndexedDB。
+    // metadata 允许部分更新（如只改 url / ext / fileName），所以单独做成深度 partial。
+    // 声明在 try 外：下载失败进 catch 也要能改任务状态（原代码声明在 try 里，
+    // catch 里调用 updateTask 会 ReferenceError，导致失败任务永远停在 run 状态）。
+    type ListItemPatch = Omit<Partial<AnyListen.Download.ListItem>, 'metadata'> & {
+      metadata?: Partial<AnyListen.Download.ListItem['metadata']>
+    }
+    const updateTask = (patch: ListItemPatch) => {
+      const updated = { ...task, ...patch, metadata: { ...task.metadata, ...patch.metadata } }
+      task.status = updated.status
+      task.statusText = updated.statusText
+      task.downloaded = updated.downloaded
+      task.total = updated.total
+      task.writeQueue = updated.writeQueue
+      task.progress = updated.progress
+      task.speed = updated.speed
+      task.isComplate = updated.isComplate
+      task.metadata = updated.metadata
+      registerBrowserTask(task)
+      void saveBrowserTask(task)
+      browserTaskUpdated.emit(taskId, patch)
+    }
+
     // 立即显示进度条（准备中状态）
     const abortController = new AbortController()
     startDownloadProgress(fileName, abortController)
@@ -255,23 +281,6 @@ const downloadWithBrowser = async (infos: Array<{ musicInfo: AnyListen.Music.Mus
       await saveBrowserTask(task)
       browserTaskUpdated.emit(taskId, task)
       browserTaskListChanged.emit()
-
-      // 辅助函数：同时更新内存和 IndexedDB
-      const updateTask = (patch: Partial<AnyListen.Download.ListItem>) => {
-        const updated = { ...task, ...patch, metadata: { ...task.metadata, ...patch.metadata } }
-        task.status = updated.status
-        task.statusText = updated.statusText
-        task.downloaded = updated.downloaded
-        task.total = updated.total
-        task.writeQueue = updated.writeQueue
-        task.progress = updated.progress
-        task.speed = updated.speed
-        task.isComplate = updated.isComplate
-        task.metadata = updated.metadata
-        registerBrowserTask(task)
-        void saveBrowserTask(task)
-        browserTaskUpdated.emit(taskId, patch)
-      }
 
       // 获取下载 URL
       const { getMusicUrl } = await import('@/shared/ipc/music')
@@ -312,11 +321,35 @@ const downloadWithBrowser = async (infos: Array<{ musicInfo: AnyListen.Music.Mus
       let lastSpeedTime = Date.now()
       let lastReceivedLength = 0
       let lastProgressTime = 0
+      let chunkCount = 0
 
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
         if (abortController.signal.aborted) break
+
+        // 拿首块字节用魔数验一次真实格式：音源可能请求 flac 却给 mp3 直链，
+        // URL 后缀能蒙混过关（代理地址没后缀），文件头蒙不掉。
+        // 检测到和所选音质不符就用真实格式保存，别把假 .flac 落盘。
+        if (chunkCount == 0) {
+          const detected = detectFormatFromBytes(value)
+          if (detected && detected != type) {
+            console.warn(
+              `[download] quality ${info.quality} expected ${type} but got ${detected}, saving as ${detected}`
+            )
+            type = detected
+            ext = extMap[type] ?? type
+            fileName = `${rawBase}.${ext}`
+            updateTask({ metadata: { ext, fileName } })
+            showNotify(
+              i18n.t('download.browser.format_corrected', {
+                name: info.musicInfo.name,
+                actual: detected,
+              })
+            )
+          }
+        }
+        chunkCount++
 
         chunks.push(value)
         receivedLength += value.byteLength

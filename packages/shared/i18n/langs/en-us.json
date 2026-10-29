@@ -90,6 +90,7 @@
   "download.browser.preparing": "Preparing...",
   "download.browser.completed": "Download complete",
   "download.browser.failed": "Download failed",
+  "download.browser.format_corrected": "Source returned {actual} format for \"{name}\", saved with the real format",
   "download.cancel_all": "Cancel all",
   "download.clear_completed": "Clear completed",
   "download.clear_completed_notify": "Completed download records cleared",

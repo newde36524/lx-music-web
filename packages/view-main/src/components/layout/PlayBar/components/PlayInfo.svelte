@@ -17,7 +17,7 @@
 
 <div class="container">
   <p class="name">
-    {musicLabel}
+    <span class="song-name">{musicLabel}</span>
     {#if qualityLabel}<span class="quality">{qualityLabel}</span>{/if}
   </p>
   <p class="status-text">{status}</p>
@@ -30,12 +30,23 @@
     contain: content;
   }
   .name {
+    display: flex;
+    align-items: center;
     padding: 3px 0;
     font-size: 14px;
     color: var(--color-font-label);
-    .mixin-ellipsis-1();
+
+    // 歌名只占自身宽度（可收缩截断），音质标签紧跟其后左对齐，flex-shrink:0 不被挤掉——
+    // 移动端窄屏下歌名一长就会把行尾的音质标签省略号截掉，这里保证它始终可见。
+    // 注意不能用 flex:1：那会把音质标签顶到最右边，而不是跟在歌名后面。
+    .song-name {
+      flex: 0 1 auto;
+      min-width: 0;
+      .mixin-ellipsis-1();
+    }
 
     .quality {
+      flex-shrink: 0;
       margin-left: 6px;
       font-size: 11px;
       color: var(--color-primary);

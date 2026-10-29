@@ -20,14 +20,16 @@ const getWindowInfo = (): WindowInfo => {
       const parsed = JSON.parse(info) as WindowInfo
       parsed.offsetX ||= DEFAULT_OFFSET
       parsed.offsetY ||= DEFAULT_OFFSET
-      parsed.isMaximized ||= false
+      // 默认最大化：只在从未保存过该字段时默认 true（用户显式还原过 false 就尊重）。
+      // 不能用 ||=，那会把显式保存的 false 也覆盖成 true。
+      if (parsed.isMaximized == null) parsed.isMaximized = true
       return parsed
     } catch {}
   }
   return {
     offsetX: DEFAULT_OFFSET,
     offsetY: DEFAULT_OFFSET,
-    isMaximized: false,
+    isMaximized: true,
   }
 }
 const saveWindowInfo = (params: WindowInfo) => {
