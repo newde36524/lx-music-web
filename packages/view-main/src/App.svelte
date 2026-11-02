@@ -37,6 +37,14 @@
     document.addEventListener('gesturestart', preventGesture, { passive: false })
     document.addEventListener('gesturechange', preventGesture, { passive: false })
     document.addEventListener('gestureend', preventGesture, { passive: false })
+
+    // Android / 其它浏览器没有 iOS 的 gesture 事件，双指捏合缩放走 touch 事件。
+    // 这里对「双指及以上」的 touchmove 阻止默认行为，从 JS 层面兜底禁用捏合缩放；
+    // 单指滑动不拦截，不影响列表滚动与滑杆拖拽。
+    const preventTouchZoom = (e: TouchEvent) => {
+      if (e.touches.length > 1) e.preventDefault()
+    }
+    document.addEventListener('touchmove', preventTouchZoom, { passive: false })
   })
 </script>
 

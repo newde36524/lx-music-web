@@ -153,6 +153,10 @@ export const createWindow = () => {
   }
   browserWindow = new BrowserWindow(options)
 
+  // 禁用双指捏合缩放页面，与 viewport 的 user-scalable=no 保持一致
+  // （Ctrl+滚轮 属于页面缩放 / zoomFactor，不受此限制，仍是设置里提示的缩放方式）
+  void browserWindow.webContents.setVisualZoomLevelLimits(1, 1)
+
   const winURL = import.meta.env.DEV
     ? `http://localhost:${DEV_SERVER_PORTS['view-main']}`
     : `file://${path.join(encodePath(__dirname), '../view-main/index.html')}`

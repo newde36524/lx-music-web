@@ -15,15 +15,25 @@
   }
 }
 
-// 触屏交互：去掉点击高亮与双击缩放（manipulation 仍保留双指缩放，不影响无障碍）
+// 触屏交互：去掉点击高亮与双击缩放。
+// 用 pan-x pan-y（而不是 manipulation）禁用双指捏合缩放，保持页面可平移/滚动，满足"全程不允许放大"。
+// 注：现代移动端浏览器（iOS 10+ / Chrome 70+）会忽略 viewport 的 user-scalable=no，
+// 因此双指缩放必须靠 CSS touch-action 与下方 App.svelte 的 touch 事件双保险来禁。
 @media (pointer: coarse) {
   html {
     -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
+    touch-action: pan-x pan-y;
   }
   .scroll,
   textarea {
     -webkit-overflow-scrolling: touch;
+  }
+  // 移动端聚焦输入框时若字号 < 16px，浏览器会自动放大页面（iOS 尤其明显），
+  // 这里把触屏上的输入类元素字号抬到 16px，从根上杜绝聚焦自动放大。
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
   }
   // 禁止长按选择文字，但保留输入框的选择能力
   * {
