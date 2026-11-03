@@ -98,7 +98,53 @@ ENV CI=${IS_CI}
 ENV GIT_COMMIT_ID=${GIT_COMMIT_ID}
 ENV GIT_COMMIT_DATE="${GIT_COMMIT_DATE}"
 
-RUN pnpm build:web
+# rolldown 在 Alpine(musl) 的 32 位 ARM 上没有原生 binding
+# (@rolldown/binding-linux-arm-musleabihf 不存在)，会 fallback 到 wasm32-wasi。
+# 这里为 TARGETARCH=arm 安装 wasm32-wasi 包供 rolldown 自动加载；
+# amd64/arm64 使用各自的 musl/gnu 原生 binding，无需此包。
+ARG TARGETARCH
+ARG TARGETVARIANT
+RUN if [ "${TARGETARCH}" = "arm" ]; then \
+      echo ">>> 安装 @rolldown/binding-wasm32-wasi (32-bit ARM musl fallback)"; \
+      pnpm add -w @rolldown/binding-wasm32-wasi@1.2.15 --save-exact; \
+      echo ">>> 强制 @napi-rs/wasm-runtime@1.2.7"; \
+      echo ">>> (1.2.6 与 @emnapi/core+runtime@2.0.0-alpha.5 组合有 bug，加载时抛"; \
+      echo ">>>  'Cannot set properties of undefined (setting initWorker)'；1.2.7 已修复)"; \
+      node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json'));p.pnpm=p.pnpm||{};p.pnpm.overrides=p.pnpm.overrides||{};p.pnpm.overrides['@napi-rs/wasm-runtime']='1.2.7';fs.writeFileSync('package.json',JSON.stringify(p,null,2))"; \
+      echo ">>> 把 @napi-rs/wasm-runtime 加进 pnpm-workspace.yaml 的 minimumReleaseAgeExclude"; \
+      echo ">>> (项目设了 minimumReleaseAge: 480 = 只允许发布超 480 天的版本；而 1.2.7 是"; \
+      echo ">>>  4 小时前发布，被 ERR_PNPM_NO_MATURE_MATCHING_VERSION 拒绝。这是必须的豁免，"; \
+      echo ">>>  只豁免这一个包，其余包仍受 480 天保护)"; \
+      node -e "const fs=require('fs');const f='pnpm-workspace.yaml';let s=fs.readFileSync(f,'utf8');if(!s.includes('@napi-rs/wasm-runtime')){const lines=s.split(String.fromCharCode(10));const idx=lines.findIndex(l=>l.trim()==='minimumReleaseAgeExclude:');if(idx>=0){lines.splice(idx+1,0,\"  - '@napi-rs/wasm-runtime'\");s=lines.join(String.fromCharCode(10));}else{s=s.replace('minimumReleaseAge:','minimumReleaseAge:'+String.fromCharCode(10)+'minimumReleaseAgeExclude:'+String.fromCharCode(10)+\"  - '@napi-rs/wasm-runtime'\");}fs.writeFileSync(f,s);}"; \
+      pnpm install --no-frozen-lockfile --config.registry=https://registry.npmmirror.com; \
+      echo ">>> 减小 rolldown wasm32-wasi 共享内存：initial 16384->4096 (1GB->256MB)，maximum 65536->16384 (4GB->1GB)"; \
+      echo ">>> (真实 build:web 里 new WebAssembly.Memory({initial:16384,maximum:65536,shared:true}) 抛"; \
+      echo ">>>  'WebAssembly.Memory(): could not allocate memory'——32 位 ARM 地址空间在加载大量模块后"; \
+      echo ">>>  碎片化，1GB 共享内存分不到。减小后 256MB 可分配，最大 1GB 足够 rolldown 增长)"; \
+      find /source-code/node_modules -name 'rolldown-binding.wasi.cjs' -exec sed -i 's/initial: 16384,/initial: 4096,/; s/maximum: 65536,/maximum: 16384,/' {} +; \
+      echo ">>> wasm 内存 patch 完成"; \
+    else \
+      echo ">>> 平台 ${TARGETARCH:-unknown} 使用 rolldown 原生 binding，跳过 wasm 安装"; \
+    fi
+
+# web bundle 输出是平台无关的 JS。但 bundler 的 native 依赖(rolldown/swc)在 Alpine(musl)
+# 的 32 位 ARM 上都没有可用 binding(rolldown 只能走 wasm 但 32 位内存不够；swc 只有 glibc
+# 版 @swc/html-linux-arm-gnueabihf，在 musl 上缺 ld-linux-armhf.so.3)。amd64/arm64 都有各自的
+# musl/gnu 原生 binding，能正常 build:web。所以 arm/v7 复用 amd64 预构建的 web bundle
+# (通过 --build-context web-prebuilt)，并补上本平台 pnpm pi 编译出的 better-sqlite3 native。
+# native 名 = ${platform}_${arch}_v${NATIVE_VERSION}，NATIVE_VERSION=11（amd64 是 linux_x64_v11）。
+COPY --from=web-prebuilt /build /web-prebuilt-build
+RUN if [ "${TARGETARCH}" = "arm" ]; then \
+      echo ">>> arm/v7: 复用 amd64 预构建 web bundle + 本平台 better-sqlite3 native"; \
+      rm -rf /source-code/build && cp -r /web-prebuilt-build /source-code/build; \
+      rm -rf /source-code/build/native/*; \
+      mkdir -p /source-code/build/native/linux_arm_v11; \
+      cp /source-code/packages/web-server/node_modules/better-sqlite3/build/Release/better_sqlite3.node \
+         /source-code/build/native/linux_arm_v11/better_sqlite3.node; \
+      echo ">>> arm/v7 build/ 组装完成 (web from amd64 + native linux_arm_v11)"; \
+    else \
+      pnpm build:web; \
+    fi
 
 FROM base AS final
 WORKDIR /server
