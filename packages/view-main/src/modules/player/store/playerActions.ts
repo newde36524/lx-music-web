@@ -143,7 +143,9 @@ export const setMusicUrl = (musicInfo: AnyListen.Music.MusicInfo, isRefresh?: bo
     .then((urlInfo) => {
       if (!urlInfo) return
       setResource(urlInfo.url)
+      // 优先用接口返回的实际音质；拿不到时用本次请求的音质兜底，保证播放栏能显示音质标签
       if (urlInfo.quality) commit.setQuality(urlInfo.quality as AnyListen.Music.Quality)
+      else commit.setQuality(getPlayQuality(musicInfo))
     })
     .catch((err: Error) => {
       console.log(err)

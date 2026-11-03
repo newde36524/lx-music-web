@@ -3,6 +3,7 @@ import { onMount, tick } from 'svelte'
 import { handleScroll } from '@/components/base/utils'
 import { lyricEvent } from '@/modules/lyric/store/event'
 import { lyricState, type Line } from '@/modules/lyric/store/state'
+import { lyricHorizontalSwipe } from '@/modules/playDetail/reactive.svelte'
 import { play, seekTo } from '@/modules/player/actions'
 import { playerState } from '@/modules/player/store/state'
 import { settingState } from '@/modules/setting/store/state'
@@ -145,6 +146,9 @@ export const useLyric = (options: {
     options.onSetMsDown(false)
   }
   const handleMove = (y: number) => {
+    // 纯歌词模式下做「左右滑切回封面」横向手势时，忽略歌词自身的拖动/滚动，
+    // 避免横滑误触发歌词滚动（需求：切换回封面时不要触发歌词自身的拖动事件）。
+    if (lyricHorizontalSwipe.value) return
     if (isMsDown) {
       if (!isStopScroll && oldLines) {
         isStopScroll = true

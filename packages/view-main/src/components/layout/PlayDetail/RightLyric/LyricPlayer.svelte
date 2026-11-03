@@ -320,4 +320,32 @@
   .lyric-space {
     height: 60%;
   }
+
+  // 移动端：参照效果图 —— 背景是高斯模糊封面（叠暗色罩，偏深），
+  // 当前播放歌词为白色大字，其余歌词为浅灰小字，形成对比。
+  // 桌面端背景为壁纸（可深可浅），保留原光晕与主题色以维持可读性。
+  @media (max-width: @breakpoint-mobile) {
+    .lyric {
+      :global {
+        // 去掉歌词光晕阴影（曾让歌词发糊）
+        .line-content,
+        .font-lrc {
+          text-shadow: none;
+          // 未播放歌词：浅灰，弱于当前播放行的白色
+          color: var(--color-400);
+        }
+        .line-content.font-mode {
+          color: var(--color-400);
+        }
+        // 当前播放行：白色 + 放大（参照效果图）
+        .line-mode.active .font-lrc,
+        .font-mode.played .font-lrc {
+          color: #fff;
+        }
+        .line-content.active {
+          transform: scale(1.2);
+        }
+      }
+    }
+  }
 </style>

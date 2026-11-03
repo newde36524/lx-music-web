@@ -12,6 +12,7 @@
   import { scrollListTo } from '@/modules/app/store/action'
   import { onMount, tick } from 'svelte'
   import { getMusicPicDelay } from '@/modules/player/store/actions'
+  import { longpress } from '@/shared/browser/longpress'
   // console.log(querystring)
   let {
     info,
@@ -78,6 +79,7 @@
   onkeydown={handleClick}
   onclick={handleClick}
   {oncontextmenu}
+  use:longpress={oncontextmenu}
 >
   <div class="pic" style={picstyle}>
     {#if playing}

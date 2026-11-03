@@ -161,4 +161,29 @@
       // }
     }
   }
+
+  // 移动端沉浸式「歌词页」：取消右上角「放大」按钮；按钮行不占垂直空间，
+  // 让封面顶到最上方，剩余按钮（关闭）叠加在封面上。
+  @media (max-width: @breakpoint-mobile) {
+    .header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 5;
+      flex: none;
+      height: 0; // 不占垂直空间，封面显示在顶部
+    }
+    .control-btn .fullscreen {
+      // 取消放大按钮。用 !important 确保盖过 .control-btn button 的 display: flex
+      display: none !important;
+    }
+    .control-btn {
+      // 叠放在封面上，给图标加阴影保证在浅色/深色封面上都可见
+      button {
+        color: var(--color-font);
+        filter: drop-shadow(0 1px 2px rgb(0 0 0 / 45%));
+      }
+    }
+  }
 </style>

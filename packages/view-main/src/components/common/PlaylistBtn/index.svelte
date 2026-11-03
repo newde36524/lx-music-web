@@ -77,7 +77,9 @@
     display: flex;
     flex-flow: column nowrap;
     gap: 10px;
-    width: 500px;
+    // 500px 在窄屏（手机播放详情页）放不下，收缩到视口内，
+    // 避免弹出层内容比 max-width 宽导致弹出层被居中计算推出屏幕（显示异常）。
+    width: min(500px, calc(100vw - 44px));
     min-height: 300px;
     max-height: 100%;
   }

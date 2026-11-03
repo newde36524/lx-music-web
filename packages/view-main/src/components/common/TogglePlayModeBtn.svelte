@@ -47,7 +47,7 @@
           toggleMode('listLoop')
         }}
       >
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" height="100%" viewBox="0 0 24 24">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24">
           <use xlink:href="#icon-list-loop" />
         </svg>
       </button>
@@ -58,7 +58,7 @@
           toggleMode('random')
         }}
       >
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24">
           <use xlink:href="#icon-list-random" />
         </svg>
       </button>
@@ -69,7 +69,7 @@
           toggleMode('list')
         }}
       >
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 32 32">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 32 32">
           <use xlink:href="#icon-list-order" />
         </svg>
       </button>
@@ -80,7 +80,7 @@
           toggleMode('singleLoop')
         }}
       >
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24">
           <use xlink:href="#icon-list-single-loop" />
         </svg>
       </button>
@@ -91,7 +91,7 @@
           toggleMode('none')
         }}
       >
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24">
           <use xlink:href="#icon-unavailable" />
         </svg>
       </button>
@@ -136,5 +136,13 @@
     flex-flow: row nowrap;
     gap: 10px;
     font-size: 14px;
+
+    // 固定每个模式按钮的尺寸（flex:none 防止被拉伸），
+    // 避免各 svg 的 width/height 属性不一致导致图标大小异常（顺序播放图标曾显示异常巨大）。
+    .btn {
+      flex: none;
+      width: 24px;
+      height: 24px;
+    }
   }
 </style>

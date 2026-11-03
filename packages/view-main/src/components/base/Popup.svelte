@@ -26,6 +26,7 @@
   } = $props()
 
   let domContent = $state<HTMLDivElement | null>(null)
+  let domPopup = $state<HTMLDivElement | null>(null)
   let isShowTop = $state(false)
   let render = $state(false)
   let anim = $state(false)
@@ -67,18 +68,22 @@
     if (height) popupStyleObj.height = height
 
     const maxWidth = document.body.clientWidth - 20
-    let center = domContent!.clientWidth / 2
+    // 用 popup 实际渲染宽度（受 max-width 约束后的宽度）做居中/对齐计算，
+    // 避免内容比 max-width 宽时用内容宽度计算导致弹出层被推出屏幕（移动端播放列表弹出层异常）。
+    const popupWidth = domPopup?.clientWidth || domContent!.clientWidth
+    let center = popupWidth / 2
     let left = rect.left + rect.width / 2 - appState.rootOffsetX - center
     if (left < sidePadding) {
       center -= sidePadding - left
       left = sidePadding
-    } else if (left + domContent!.clientWidth > maxWidth) {
-      let newLeft = maxWidth - domContent!.clientWidth
+    } else if (left + popupWidth > maxWidth) {
+      let newLeft = maxWidth - popupWidth
       center = center + left - newLeft
       left = newLeft
     }
     popupStyleObj.left = left
-    popupStyleObj['--arrow-left'] = center - arrowWidth
+    // 箭头保持在弹出层可见范围内
+    popupStyleObj['--arrow-left'] = Math.max(0, Math.min(center - arrowWidth, popupWidth - arrowWidth * 2))
     updateStyle()
   }
   const handleTransitionEnd: TransitionEventHandler<HTMLDivElement> = (event) => {
@@ -123,6 +128,7 @@
 {#if render}
   <Portal to="#root">
     <div
+      bind:this={domPopup}
       class={['popup', { top: isShowTop, active: anim }]}
       style={popupStyle}
       inert={!anim}
@@ -192,6 +198,8 @@
     }
   }
   .popup-content {
+    min-width: 0; // 允许在 max-width 约束内收缩，避免内容比弹出层宽时横向溢出
+    max-width: 100%;
     min-height: 0;
     padding: 10px;
     outline: none;

@@ -32,17 +32,20 @@
   let domBtn = $state<HTMLElement | null>(null)
 
   const handleShowPopup = (evt: MouseEvent) => {
+    // 点击按钮 → 打开；再次点击 → 关闭（具备切换能力）。
+    // 立即生效（不走 hover 的 100ms 延迟），保证移动端点按响应跟手。
+    if (timeout) {
+      clearTimeout(timeout)
+      timeout = null
+    }
     if (visible) {
       evt.stopPropagation()
-      if (autoshow) return
-      handlMsLeave()
+      visible = false
+      onvisible?.(false)
     } else {
-      handlMsEnter()
+      visible = true
+      onvisible?.(true)
     }
-    // setTimeout(() => {
-    //   // if (!)
-    //   visible.value = !visible.value
-    // }, 50)
   }
 
   let timeout: number | null = null

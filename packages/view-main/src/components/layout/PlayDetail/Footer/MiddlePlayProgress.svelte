@@ -36,4 +36,11 @@
     // padding-bottom: 6px;
     margin: 0 8px;
   }
+
+  // 移动端：背景是高斯模糊封面（叠暗色罩，偏深），时间标签用浅色（参照效果图）
+  @media (max-width: @breakpoint-mobile) {
+    .middle-play-progress {
+      color: rgba(255, 255, 255, 0.55);
+    }
+  }
 </style>
