@@ -22,7 +22,7 @@
 
     --content-width: 72%;
 
-    @media (max-width: @breakpoint-mobile) {
+    @media (max-width: @breakpoint-playdetail-mobile) {
       width: 100%;
       padding: 10px 12px;
       --content-width: 88%;
@@ -30,7 +30,7 @@
   }
 
   // 移动端沉浸式「歌词页」：把封面 + 信息拆成 Main 的直接子项，便于用 order 重排
-  @media (max-width: @breakpoint-mobile) {
+  @media (max-width: @breakpoint-playdetail-mobile) {
     .left-info {
       display: contents;
     }

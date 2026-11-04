@@ -3,24 +3,14 @@
   import { playDetailLyricsMode } from '@/modules/playDetail/reactive.svelte'
   import { t, type Message } from '@/plugins/i18n'
   import { QUALITYS_BEST_FIRST } from '@/modules/player/utils/quality'
-  import { onMount } from 'svelte'
-  import { MEDIA_QUERY_MOBILE } from '@/shared/browser/mobile'
 
   const qualityLabel = $derived($quality ? $t(`settings.player.music_quality_${$quality}` as keyof Message) : '')
 
   // 移动端：效果图在歌手名右侧显示「多个音质标签」。本项目歌曲数据没有酷我的
   // 原唱/3D丽音/伴唱/视频 格式标志，这里用歌曲「真实可用的音质」做成多标签行
   // （128K/320K/FLAC/母带 等，当前播放的音质高亮）。
-  let isMobile = $state(false)
-  onMount(() => {
-    const mq = window.matchMedia(MEDIA_QUERY_MOBILE)
-    const update = () => {
-      isMobile = mq.matches
-    }
-    update()
-    mq.addEventListener('change', update)
-    return () => mq.removeEventListener('change', update)
-  })
+  // 需求：大尺寸页面的歌词详情页显示效果也和手机端一样 → 恒为移动端样式。
+  let isMobile = $state(true)
   const availableQualities = $derived.by(() => {
     const list: AnyListen.Music.Quality[] = []
     const info = $musicInfo
@@ -79,7 +69,7 @@
   }
 
   // 移动端沉浸式「歌词页」：歌曲信息块落到进度条上方，标题放大、歌手次之、音质做成胶囊标签
-  @media (max-width: @breakpoint-mobile) {
+  @media (max-width: @breakpoint-playdetail-mobile) {
     // 纯歌词模式下隐藏歌曲信息块
     .info.lyrics-mode {
       display: none;

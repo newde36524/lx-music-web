@@ -164,7 +164,7 @@
 
   // 移动端沉浸式「歌词页」：取消右上角「放大」按钮；按钮行不占垂直空间，
   // 让封面顶到最上方，剩余按钮（关闭）叠加在封面上。
-  @media (max-width: @breakpoint-mobile) {
+  @media (max-width: @breakpoint-playdetail-mobile) {
     .header {
       position: absolute;
       top: 0;

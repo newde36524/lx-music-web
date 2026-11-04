@@ -106,25 +106,33 @@
     width: 100%;
     height: 100%;
     contain: strict;
+    // 沉浸式背景（模糊封面，叠暗色罩，偏深）：覆盖主题色为浅色，保证白字可读。
+    // 桌面端同样使用沉浸式封面背景（不再铺绿色壁纸/主题底色），故这里统一覆盖。
+    --color-font: #fff;
+    --color-font-label: rgb(255 255 255 / 65%);
+    --color-300: rgb(255 255 255 / 50%);
+    --color-250: rgb(255 255 255 / 50%);
+    --color-400: rgb(255 255 255 / 55%);
+    --color-primary-dark-100: #fff;
     color: var(--color-font);
-    background-color: var(--color-content-background);
+    background-color: transparent; // 背景交给 .bg-cover（模糊封面）
     // overflow: hidden;
     border-radius: @radius-border;
     // border-left: 12px solid var(--color-primary-alpha-900);
     // will-change: transform;
 
+    // 白字在模糊封面上加轻微投影，保证可读（中性色，不带绿色光晕）
+    :global {
+      * {
+        text-shadow: 0 1px 2px rgb(0 0 0 / 45%), 0 2px 4px rgb(0 0 0 / 25%);
+      }
+      svg {
+        filter: drop-shadow(0 0 2px rgb(0 0 0 / 35%));
+      }
+    }
+
     &.dybg {
       :global {
-        * {
-          text-shadow:
-            0 0 2px var(--color-primary-light-100-alpha-900),
-            0 0 3px var(--color-primary-light-100-alpha-900),
-            0 0 4px var(--color-primary-dark-700-alpha-900);
-        }
-        svg {
-          filter: drop-shadow(0 0 2px var(--color-primary-light-100-alpha-600))
-            drop-shadow(0 0 4px var(--color-primary-light-100-alpha-700));
-        }
         .progress {
           > .progress {
             box-shadow:
@@ -133,90 +141,50 @@
           }
         }
       }
-      .bg {
-        background-size: 125% 125%;
-        &::before {
-          background-color: var(--color-content-background);
-          opacity: 0.7;
-        }
-        &::after {
-          background-color: transparent;
-          backdrop-filter: blur(30px);
-        }
-      }
     }
   }
+
+  // 隐藏原壁纸背景（.bg）：详情页统一使用当前封面做模糊色调（.bg-cover），
+  // 不再铺绿色/主题壁纸（需求：不要有绿色的蒙版）。
   .bg {
+    display: none;
+  }
+
+  // 沉浸式背景：当前封面的高斯模糊（所有尺寸统一，桌面端也生效）。
+  // 背景用当前封面做模糊色调（跟随歌词封面），因此隐藏原壁纸背景（.bg）。
+  .bg-cover {
     position: absolute;
     top: 0;
     left: 0;
     z-index: -1;
+    display: block;
     width: 100%;
     height: 100%;
-    background: var(--background-image) var(--background-image-position) no-repeat;
-    background-size: var(--background-image-size);
-    // background-size: 110% 110%;
-    // filter: blur(60px);
-    opacity: 0.7;
-    &::before {
-      display: block;
-      width: 100%;
-      height: 100%;
-      content: '';
-      background-color: var(--color-app-background);
-    }
+    overflow: hidden;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    // 背景为当前封面的高斯模糊：放大 1.25 倍避免模糊后边缘露出透明边，
+    // 与顶部封面横幅（底部已改为透明渐变）相融。
+    filter: blur(40px);
+    transform: scale(1.25);
+    pointer-events: none;
+
     &::after {
-      position: absolute;
-      top: 0;
-      left: 0;
       display: block;
       width: 100%;
       height: 100%;
       content: '';
-      background-color: var(--color-main-background);
+      // 高斯模糊背景上叠暗色：保留封面色调（与封面相融），又保证白色歌词/文字可读。
+      // 顶部额外加深（封面顶部已改为透明度渐变，此处透出的是同一封面浅色天空的模糊，
+      // 需加深才不会有「白色模糊」，让背景一直延伸到状态栏/视口顶部，实现纯全屏）。
+      background: linear-gradient(to bottom, rgb(0 0 0 / 75%) 0%, rgb(0 0 0 / 30%) 40%, rgb(0 0 0 / 30%) 100%);
     }
   }
 
-  // 移动端沉浸式「歌词页」：整页铺满，专辑封面改为顶部全宽横幅。
-  // 背景用当前封面做模糊色调（跟随歌词封面），因此隐藏原壁纸背景（.bg）。
-  .bg-cover {
-    display: none; // 仅移动端显示
-  }
-  @media (max-width: @breakpoint-mobile) {
+  @media (max-width: @breakpoint-playdetail-mobile) {
     .play-detail {
       border-radius: 0;
-      background-color: var(--color-content-background);
-    }
-    .bg {
-      display: none;
-    }
-    .bg-cover {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: -1;
-      display: block;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: cover;
-      // 背景为当前封面的高斯模糊：放大 1.25 倍避免模糊后边缘露出透明边，
-      // 与顶部封面横幅（底部已改为透明渐变）相融。
-      filter: blur(40px);
-      transform: scale(1.25);
-      pointer-events: none;
-
-      &::after {
-        display: block;
-        width: 100%;
-        height: 100%;
-        content: '';
-        // 高斯模糊背景上叠一层轻微暗色：保留封面色调（与顶部封面相融），
-        // 又保证白色歌词/文字在任意封面上都可读（参照效果图）。
-        background-color: rgb(0 0 0 / 30%);
-      }
     }
   }
 </style>

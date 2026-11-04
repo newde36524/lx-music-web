@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
   import RightControlBtns from './RightControlBtns.svelte'
   import LeftControlBtns from './LeftControlBtns.svelte'
   import MiddlePlayProgress from './MiddlePlayProgress.svelte'
@@ -8,22 +7,13 @@
   import TogglePlayModeBtn from '@/components/common/TogglePlayModeBtn.svelte'
   import PlaylistBtn from '@/components/common/PlaylistBtn/index.svelte'
   import { fade } from 'svelte/transition'
-  import { MEDIA_QUERY_SMALL } from '@/shared/browser/mobile'
 
   let { introend }: { introend: boolean } = $props()
 
   // 窄屏（手机）只保留「随机 + 上一曲/播放/下一曲 + 播放列表」五个按钮（参照效果图），
   // 隐藏音效 / 倍速 / 评论 / 桌面歌词 / 收藏 / 音量等次要按钮；宽屏保持完整控制栏。
-  let isSmall = $state(false)
-  onMount(() => {
-    const mq = window.matchMedia(MEDIA_QUERY_SMALL)
-    const update = () => {
-      isSmall = mq.matches
-    }
-    update()
-    mq.addEventListener('change', update)
-    return () => mq.removeEventListener('change', update)
-  })
+  // 需求：大尺寸页面的歌词详情页显示效果也和手机端一样 → 恒为移动端精简控制栏。
+  let isSmall = $state(true)
 </script>
 
 <div class="footer">
@@ -64,7 +54,7 @@
     height: 100px;
     contain: strict;
 
-    @media (max-width: @breakpoint-mobile) {
+    @media (max-width: @breakpoint-playdetail-mobile) {
       // 移动端沉浸式「歌词页」播放栏：控制按钮与外部播放条(PlayBar)同尺寸（30/37px），
       // footer 高度按「进度条 21px + 控制行 38px + 上滑提示 20px + 底部内边距 8px」预留。
       height: 88px;
@@ -81,7 +71,7 @@
       width: 100%;
     }
 
-    @media (max-width: @breakpoint-mobile) {
+    @media (max-width: @breakpoint-playdetail-mobile) {
       padding: 0 10px 12px;
     }
   }
@@ -101,7 +91,7 @@
     padding-top: 15px;
 
     // 窄屏放不下两侧各 4 个按钮，隐藏掉（音效 / 倍速 / 评论 / 桌面歌词），保留中间的播放控制
-    @media (max-width: @breakpoint-small) {
+    @media (max-width: @breakpoint-playdetail-mobile) {
       flex: 0;
       display: none;
     }
@@ -163,7 +153,7 @@
   // 窄屏（手机）：显示「随机」和「播放列表」，两侧各 flex:1 把中间的播放按钮组居中（参照效果图）。
   // 注意：要覆盖上面基础 .side 规则里 @media (max-width: @breakpoint-small) 的 display:none，
   // 所以这条必须写在它之后。
-  @media (max-width: @breakpoint-small) {
+  @media (max-width: @breakpoint-playdetail-mobile) {
     .side {
       flex: 1;
       display: flex;

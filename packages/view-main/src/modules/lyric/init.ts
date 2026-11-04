@@ -24,7 +24,12 @@ const play = () => {
   lyric.play(currentTime)
 }
 const pause = () => {
-  lyric.pause()
+  // 暂停/缓冲时定位到「实际音频时间」再冻结，而不是用库的墙钟推算时间：
+  // 网络差时频繁缓冲，墙钟推算（now - performanceTime）会让歌词跑到音频前面（脱节）；
+  // 用实际音频时间定位可保持同步（positionLyric 内部先 play 再 pause，正确且不推进）。
+  const currentTime = getCurrentTime()
+  if (Number.isFinite(currentTime)) positionLyric(currentTime)
+  else lyric.pause()
 }
 
 const stop = () => {
@@ -32,12 +37,24 @@ const stop = () => {
 }
 
 /**
+ * 定位歌词到指定毫秒并冻结（不推进）。
+ * lyric-font-player 的 setTime() 会把当前行算成「上一行」（off-by-one），而 play() 会推进；
+ * 先 play() 再立即 pause() 既定位到正确行，又保持冻结（pause() 会取消已排队的下一行定时器，
+ * 且重新校验当前行未变，不会多触发一次 onPlay）。
+ */
+const positionLyric = (time: number) => {
+  if (!Number.isFinite(time)) return
+  lyric.play(time)
+  lyric.pause()
+}
+
+/**
  * 拖动进度条时实时同步歌词到指定时间（毫秒）。
- * 用 setTime 只做一次性定位（不推进），避免拖动过程中歌词继续走。
+ * 用「定位+冻结」：库的 setTime 会算成上一行（off-by-one），play()+pause() 才能定位到正确行。
  */
 const setLyricTime = (time: number) => {
   if (!playerState.musicInfo.id) return
-  lyric.setTime(time)
+  positionLyric(time)
 }
 
 /**
@@ -48,7 +65,7 @@ const setLyricProgress = (time: number) => {
   if (playerState.playerPlaying) {
     lyric.play(time * 1000)
   } else {
-    lyric.setTime(time * 1000)
+    positionLyric(time * 1000)
   }
 }
 

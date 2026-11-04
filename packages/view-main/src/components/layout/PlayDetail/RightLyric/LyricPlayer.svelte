@@ -324,7 +324,7 @@
   // 移动端：参照效果图 —— 背景是高斯模糊封面（叠暗色罩，偏深），
   // 当前播放歌词为白色大字，其余歌词为浅灰小字，形成对比。
   // 桌面端背景为壁纸（可深可浅），保留原光晕与主题色以维持可读性。
-  @media (max-width: @breakpoint-mobile) {
+  @media (max-width: @breakpoint-playdetail-mobile) {
     .lyric {
       :global {
         // 去掉歌词光晕阴影（曾让歌词发糊）

@@ -7,6 +7,10 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- iOS 添加到主屏幕后按独立 App 运行（全屏、可后台播放）。需要它配合 DOM 中的 <audio>
+         与 MediaSession，iOS 才会在切到其它 App 后继续播放（否则音频被系统挂起）。 -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <!-- <meta name="theme-color" content="#fff" /> -->
   </head>
   <body id="body" style="background-color: transparent">

@@ -102,8 +102,30 @@ export const useLyric = (options: {
         if (preDomP && preDomP !== domP) offsetTop -= (preDomP.clientHeight - preDomP.clientHeight / 1.1) / 2
         lineHeight *= 1.1
       }
-      cancelScrollFn = handleScroll(options.domLyric, offsetTop + lineHeight - options.domLyric.clientHeight * 0.46, duration)
+      const to = offsetTop + lineHeight - options.domLyric.clientHeight * 0.46
+      if (duration <= 0) {
+        // 大跨度跳转（拖动进度条 / 缓冲恢复 / 从后台切回）瞬时定位到当前行，
+        // 避免 300ms 平滑滚动在大量行之间快速穿越（看起来像隧道发糊）。
+        // 注意不能直接给 handleScroll 传 0：easeInOutQuad 除以 0 会得到 NaN。
+        if (cancelScrollFn) {
+          cancelScrollFn()
+          cancelScrollFn = null
+        }
+        const dom = options.domLyric
+        const maxScrollTop = dom.scrollHeight - dom.clientHeight
+        dom.scrollTop = Math.max(0, Math.min(to, maxScrollTop))
+        return
+      }
+      cancelScrollFn = handleScroll(options.domLyric, to, duration)
     } else {
+      if (duration <= 0) {
+        if (cancelScrollFn) {
+          cancelScrollFn()
+          cancelScrollFn = null
+        }
+        options.domLyric.scrollTop = 0
+        return
+      }
       cancelScrollFn = handleScroll(options.domLyric, 0, duration)
     }
   }
@@ -253,8 +275,10 @@ export const useLyric = (options: {
     }
     isSetedLines &&= false
     if (line - oldLine != 1) {
+      // 非连续跳变（拖动进度条 / seek / 缓冲恢复 / 从后台切回）：瞬时定位到目标行，
+      // 不做平滑滚动，避免在大量行之间快速穿越。
       oldLine = line
-      handleScrollLrc()
+      handleScrollLrc(0)
       return
     }
 

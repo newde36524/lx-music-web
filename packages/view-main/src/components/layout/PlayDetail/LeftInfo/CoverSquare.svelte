@@ -4,19 +4,20 @@
   import { setShowPlayDetail } from '@/modules/playDetail/store/commit'
   import { skipNext, skipPrev } from '@/modules/player/actions'
   import { playDetailLyricsMode } from '@/modules/playDetail/reactive.svelte'
-  import { MEDIA_QUERY_MOBILE } from '@/shared/browser/mobile'
 
   // let { introend }: { introend: boolean } = $props()
 
   let pic = $derived($musicInfo.pic)
 
-  const isMobile = () => window.matchMedia(MEDIA_QUERY_MOBILE).matches
+  // 需求：大尺寸页面的歌词详情页显示效果也和手机端一样（含封面拖动手势），
+  // 故封面手势与纯歌词模式不再按视口宽度判断，恒为移动端行为。
+  const isMobile = () => true
 
   // 封面手势（移动端沉浸式「歌词页」）：
   // - 按住封面 → 封面悬浮缩小（过渡动画），滑动时跟随手指（不超出原始区域）
-  // - 按住时四周空位显示方向提示：左=退出页面，上=下一首，右=显示歌词，下=上一首
-  // - 松手：右滑 → 进入纯歌词模式；左滑 → 退出详情页；上滑 → 下一首；下滑 → 上一首；否则回弹
-  //   （上滑→下一首与效果图「上滑可切换下一首」一致；若改回上滑=上一首需同步提示文案）
+  // - 按住时四周空位显示方向提示：左/右=退出页面，上=下一首，下=上一首
+  // - 松手：轻点（非拖动）→ 进入纯歌词模式；左滑/右滑 → 退出详情页；
+  //   上滑 → 下一首；下滑 → 上一首（与效果图「上滑可切换下一首」一致）
   let swipeStartX = 0
   let swipeStartY = 0
   let swipeActive = false
@@ -99,14 +100,16 @@
     const dy = dragY
     const absX = Math.abs(dx)
     const absY = Math.abs(dy)
+    const wasDragging = dragging
     resetGesture()
-    // 向右滑：水平位移足够大且以水平方向为主 → 进入纯歌词模式（仅移动端）
-    if (dx > 80 && absX > absY * 1.2) {
-      if (isMobile()) playDetailLyricsMode.value = true
+    // 轻点（非拖动）封面 → 进入纯歌词模式（需求：封面点击进入纯歌词页面）
+    if (!wasDragging) {
+      playDetailLyricsMode.value = true
       return
     }
-    // 向左滑：水平位移足够大且以水平方向为主 → 退出详情页
-    if (dx < -80 && absX > absY * 1.2) {
+    // 水平滑动（左滑 / 右滑）：位移足够大且以水平方向为主 → 退出详情页
+    // （需求：右滑改为与左滑一样退出详情页）
+    if (absX > 80 && absX > absY * 1.2) {
       setShowPlayDetail(false)
       return
     }
@@ -115,7 +118,6 @@
       if (dy < -80) skipNext()
       else if (dy > 80) skipPrev()
     }
-    // 轻点：不再切换纯歌词（改为右滑进入），无操作
   }
 </script>
 
@@ -146,7 +148,7 @@
   <!-- 按住封面时四周空位显示的方向提示（不随封面缩放/移动，固定在四周） -->
   <div class="hint hint-left" class:show={pressed} class:active={hintActive === 'left'}>退出页面</div>
   <div class="hint hint-top" class:show={pressed} class:active={hintActive === 'top'}>下一首</div>
-  <div class="hint hint-right" class:show={pressed} class:active={hintActive === 'right'}>显示歌词</div>
+  <div class="hint hint-right" class:show={pressed} class:active={hintActive === 'right'}>退出页面</div>
   <div class="hint hint-bottom" class:show={pressed} class:active={hintActive === 'bottom'}>上一首</div>
 </div>
 
@@ -158,14 +160,16 @@
     aspect-ratio: 1 / 1;
     contain: strict;
   }
-  // 可视封面：负责缩放/位移（按住缩小、拖动跟随），其余属性与原来 .cover 一致
+  // 可视封面：负责缩放/位移（按住缩小、拖动跟随）。
+  // 沉浸式背景（模糊封面）上不再铺绿色容器/边框/光晕：封面直接浮在背景上（与 CD 封面、移动端一致），
+  // 让封面与背景色调统一（需求：左边封面和背景不搭，去掉绿色框）。
   .cover-scale {
     position: absolute;
     inset: 0;
-    background-color: var(--color-primary-light-300-alpha-800);
-    border: 1px solid var(--color-primary-alpha-800);
+    background-color: transparent;
+    border: none;
     border-radius: 6px;
-    box-shadow: 0 0 6px var(--color-primary-dark-200-alpha-600);
+    box-shadow: none;
     transition: transform 0.15s ease;
     &.dragging {
       transition: none; // 拖动时立即跟随手指
@@ -249,7 +253,7 @@
   // 融入背后的高斯模糊背景，并在横幅底部叠加歌手 / 专辑名。
   // 进入纯歌词模式时封面缩到接近图标大小、水平居中置顶（flex-basis/width 过渡动画），
   // 轻点小图标放大切回封面模式。
-  @media (max-width: @breakpoint-mobile) {
+  @media (max-width: @breakpoint-playdetail-mobile) {
     .cover {
       order: 1;
       flex: none;
@@ -270,12 +274,14 @@
       box-shadow: none;
       background-color: transparent; // 底部不再铺深色块，背景交给高斯模糊页面背景
 
-      // 封面底部改为「透明度渐变」：用遮罩让封面在底部边缘完全透明（替代原白色渐变），
-      // 透出背后的高斯模糊背景，使封面与背景相融；歌手/专辑名叠加层不受遮罩影响。
+      // 封面改为「透明度渐变」：上下边缘都用遮罩让封面在边缘完全透明（替代原白色渐变），
+      // 透出背后的高斯模糊背景，使封面与背景在上下两端都相融（需求：上边和下边一样做透明度渐变）。
+      // 顶部渐变稍小于底部（35% vs 45%），避免把封面图里的专辑名也一并淡掉；
+      // 歌手/专辑名叠加层（.cover-overlay）不受遮罩影响。
       // （遮罩只作用在 .pic 上，.cover-overlay 是独立元素，保持不透明可读）
       .cover:not(.lyrics-mode) & :global(.pic) {
-        -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
-        mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 35%, black 55%, transparent 100%);
+        mask-image: linear-gradient(to bottom, transparent 0%, black 35%, black 55%, transparent 100%);
       }
     }
     .cover-overlay {

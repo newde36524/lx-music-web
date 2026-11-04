@@ -18,12 +18,16 @@ import { playerState } from '../store/state'
 let unregistered = createUnsubscriptionSet()
 export const initMediaSessionInfo = () => {
   onRelease(unregistered.clear.bind(unregistered))
-  // 创建一个空白音频以保持对 Media Session 的注册
+  // 创建一个空白音频以保持对 Media Session 的注册。
+  // 挂到 DOM（隐藏）：未挂载的 <audio> 不会被视为活动媒体，iOS 会因缺少活动媒体
+  // 元素而无法进入后台播放（锁屏控制 / 后台音频都依赖它）。
   const emptyAudio = new Audio()
   emptyAudio.autoplay = false
   emptyAudio.src = emptyAudioSource
   emptyAudio.controls = false
   emptyAudio.preload = 'auto'
+  emptyAudio.style.display = 'none'
+  document.body.appendChild(emptyAudio)
   emptyAudio.onplaying = () => {
     emptyAudio.pause()
   }

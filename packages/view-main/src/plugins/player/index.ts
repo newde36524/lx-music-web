@@ -97,6 +97,10 @@ export const createAudio = () => {
   audio.autoplay = true
   audio.preload = 'auto'
   audio.crossOrigin = 'anonymous'
+  // 后台播放：必须把 <audio> 挂到 DOM（隐藏），浏览器才会把它当作「活动媒体元素」，
+  // 切换 App / 退到后台时才不会暂停或丢弃，MediaSession 锁屏控制与 iOS 后台播放才生效。
+  audio.style.display = 'none'
+  document.body.appendChild(audio)
 
   // https://developer.chrome.com/blog/autoplay
   audio.addEventListener('playing', () => {
@@ -113,6 +117,7 @@ export const createAudio = () => {
 export const releasePlayer = async () => {
   if (!audio) return
   setStop()
+  audio.remove()
   audio = null
 
   await audioContext!.close().catch(() => {})
@@ -145,6 +150,7 @@ export const releasePlayer = async () => {
 
   if (audioOutput) {
     audioOutput.srcObject = null
+    audioOutput.remove()
     audioOutput = null
   }
 }
@@ -229,6 +235,9 @@ const initAudioOutputDestination = () => {
   audioOutput.autoplay = true
   audioOutput.preload = 'auto'
   audioOutput.crossOrigin = 'anonymous'
+  // 后台播放：与主 <audio> 一样挂到 DOM（隐藏），避免系统把未挂载的音频元素当作非活动媒体而暂停。
+  audioOutput.style.display = 'none'
+  document.body.appendChild(audioOutput)
 
   audioOutput.addEventListener('playing', () => {
     if (audioContext?.state == 'suspended') {

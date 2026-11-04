@@ -14,6 +14,14 @@
 // 注意：需要与 src/shared/browser/mobile.ts 里的 SMALL_BREAKPOINT 保持一致
 @breakpoint-small: 560px;
 
+// 歌词详情页（PlayDetail）专用断点：移动端沉浸式布局的宽度阈值。
+// 与 Cover.svelte 里判断「移动端强制方形封面」的 900px 保持一致：
+// - ≤900px：移动端沉浸式（封面全宽横幅 + 拖动手势 + 纯歌词模式）
+// - >900px：桌面端原布局（封面原尺寸 + 尊重 playDetail.coverStyle 设置可配置）
+// 说明：之前为满足「大尺寸页面也和手机端一样」把此值设成 99999px（恒为移动端），
+// 但桌面端反馈希望封面保持原来的大小和可设置，故恢复为常规断点。
+@breakpoint-playdetail-mobile: @breakpoint-mobile;
+
 // Height
 @height-toolbar: 54px;
 @height-player: 72px;

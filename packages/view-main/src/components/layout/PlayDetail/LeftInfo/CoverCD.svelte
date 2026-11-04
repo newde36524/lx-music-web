@@ -28,29 +28,18 @@
       </mask>
     </defs>
 
-    <circle cx="50" cy="50" r="50" fill="var(--color-primary-light-400)" mask="url(#play-detail-cd-hole)" />
+    <circle cx="50" cy="50" r="50" fill="#fff" mask="url(#play-detail-cd-hole)" />
     <foreignObject style="mix-blend-mode: multiply" x="2" y="2" width="96" height="96" mask="url(#play-detail-cd-hole)">
       <Image src={pic} />
     </foreignObject>
     <circle
       cx="50"
       cy="50"
-      r="20"
-      style="mix-blend-mode: multiply"
-      fill="var(--color-primary-light-300-alpha-600)"
-      mask="url(#play-detail-cd-hole)"
-    />
-    <circle
-      cx="50"
-      cy="50"
-      r="11"
+      r="11.6"
       fill="none"
-      stroke="var(--color-primary-light-300)"
-      stroke-width="1.2"
-      style="mix-blend-mode: exclusion"
-      filter="drop-shadow(0 0 1 rgba(0,0,0,0.5))"
+      stroke="rgb(0 0 0 / 30%)"
+      stroke-width="0.4"
     />
-    <circle cx="50" cy="50" r="11.6" fill="none" stroke="var(--color-primary-light-300)" stroke-width="0.4" />
   </svg>
 </div>
 
@@ -62,47 +51,18 @@
     aspect-ratio: 1 / 1;
     padding: 5%;
     contain: strict;
-    background-color: var(--color-primary-light-300-alpha-800);
+    // 沉浸式背景（模糊封面）上不再铺绿色容器：容器透明，CD 直接浮在背景上，
+    // 与背景色调统一（需求：左边封面和背景不搭，去掉绿色框/光晕/角点）。
+    background-color: transparent;
     border-radius: 6px;
-    box-shadow: 0 0 6px var(--color-primary-alpha-500);
-    // box-shadow: 0 0 6px var(--color-primary-alpha-500);
-    // border-radius: 6px;
+    // 去掉绿色光晕（box-shadow）与容器模糊（backdrop-filter）
+    // 保留轻微半透明，让 CD 更融入背景
     opacity: 0.8;
-    backdrop-filter: blur(4px);
 
-    .mixin-dot(@color: var(--color-primary-light-300-alpha-800)) {
-      .mixin-after();
-
-      width: 7%;
-      aspect-ratio: 1 / 1;
-      background-color: @color;
-      border-radius: 50%;
-      box-shadow: inset 0 0 4px var(--color-primary-dark-300-alpha-800);
-    }
-
-    .top-dot {
-      &::before {
-        top: 5%;
-        left: 5%;
-        .mixin-dot();
-      }
-      &::after {
-        top: 5%;
-        right: 5%;
-        .mixin-dot();
-      }
-    }
+    // 隐藏绿色角点（原为绿色装饰，与暗色背景不搭）
+    .top-dot,
     .bottom-dot {
-      &::before {
-        bottom: 5%;
-        left: 5%;
-        .mixin-dot();
-      }
-      &::after {
-        right: 5%;
-        bottom: 5%;
-        .mixin-dot();
-      }
+      display: none;
     }
   }
   .cover-cd {

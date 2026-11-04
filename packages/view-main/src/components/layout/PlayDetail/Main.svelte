@@ -38,7 +38,7 @@
   // 移动端上下堆叠：上面专辑信息，下面歌词
   // 注意：display:contents 与 order 分别写在 LeftInfo / RightLyric 自身的作用域里，
   // 因为 Svelte 的样式裁剪会丢弃父组件里指向子组件根节点的选择器。
-  @media (max-width: @breakpoint-mobile) {
+  @media (max-width: @breakpoint-playdetail-mobile) {
     .track-layer {
       flex-flow: column nowrap;
     }

@@ -109,7 +109,7 @@
   }
 
   // 移动端沉浸式「歌词页」：歌词排在封面横幅之后、歌曲信息之前
-  @media (max-width: @breakpoint-mobile) {
+  @media (max-width: @breakpoint-playdetail-mobile) {
     .right-lyric {
       order: 2;
       flex: auto;

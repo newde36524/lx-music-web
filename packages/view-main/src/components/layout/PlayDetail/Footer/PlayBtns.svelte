@@ -2,15 +2,13 @@
   import { skipNext, skipPrev, togglePlay } from '@/modules/player/actions'
   import { playing } from '@/modules/player/reactive.svelte'
   import { t } from '@/plugins/i18n'
-  import { onMount } from 'svelte'
-  import { MEDIA_QUERY_MOBILE } from '@/shared/browser/mobile'
 
   // 与外部播放条(PlayBar)保持一致的按钮尺寸：
   // PlayBar 容器高度 移动端 58px / 桌面 72px，图标因子 0.52/0.65 →
   // 上下曲 30/37px、播放/暂停 37/46px（移动端/桌面）。
+  // 需求：大尺寸页面的歌词详情页显示效果也和手机端一样 → 恒为移动端按钮尺寸。
   const getIconSize = () => {
-    const isMobile = typeof window !== 'undefined' && window.matchMedia(MEDIA_QUERY_MOBILE).matches
-    const height = isMobile ? 58 : 72
+    const height = 58 // 移动端容器高度
     return {
       iconSize: `${Math.trunc(height * 0.52)}px`,
       iconSize2: `${Math.trunc(height * 0.65)}px`,
@@ -19,18 +17,6 @@
   const initial = getIconSize()
   let iconSize = $state(initial.iconSize)
   let iconSize2 = $state(initial.iconSize2)
-
-  onMount(() => {
-    const mq = window.matchMedia(MEDIA_QUERY_MOBILE)
-    const update = () => {
-      const { iconSize: s, iconSize2: s2 } = getIconSize()
-      iconSize = s
-      iconSize2 = s2
-    }
-    update()
-    mq.addEventListener('change', update)
-    return () => mq.removeEventListener('change', update)
-  })
 </script>
 
 <div class="container">
@@ -68,7 +54,7 @@
     padding-right: 10px;
     padding-left: 10px;
 
-    @media (max-width: @breakpoint-mobile) {
+    @media (max-width: @breakpoint-playdetail-mobile) {
       gap: 12px;
       padding-right: 8px;
       padding-left: 8px;
@@ -95,7 +81,7 @@
   }
 
   // 移动端：背景是高斯模糊封面（叠暗色罩，偏深），控件用白色（参照效果图）
-  @media (max-width: @breakpoint-mobile) {
+  @media (max-width: @breakpoint-playdetail-mobile) {
     .btn {
       color: #fff;
     }
