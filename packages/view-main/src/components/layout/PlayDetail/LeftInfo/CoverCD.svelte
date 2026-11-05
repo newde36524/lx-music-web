@@ -47,9 +47,13 @@
   .cover {
     position: relative;
     flex: none;
-    width: var(--content-width);
+    // 封面宽度：不超过内容宽度（--content-width），且在横屏/矮视口下按可用高度收缩
+    // （100cqh = .left-info 内容高度；预留 ~100px 给封面下方的歌曲信息块），
+    // 避免封面超过主区高度被裁剪、把信息块/进度条挤出视口（手机横屏问题）。
+    width: min(var(--content-width), calc(100cqh - 100px));
     aspect-ratio: 1 / 1;
-    padding: 5%;
+    // 去掉 padding：CD 封面填满整个方形容器，呈现完整正圆（需求：手机横屏 CD 放大、正圆）。
+    padding: 0;
     contain: strict;
     // 沉浸式背景（模糊封面）上不再铺绿色容器：容器透明，CD 直接浮在背景上，
     // 与背景色调统一（需求：左边封面和背景不搭，去掉绿色框/光晕/角点）。
@@ -69,7 +73,8 @@
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    box-shadow: 0 0 4px var(--color-primary-alpha-400);
+    // 去掉绿色光晕（需求：手机横屏去除 CD 外圈绿色圈）
+    box-shadow: none;
     animation: spin 120s linear infinite;
     animation-play-state: paused; /* 默认暂停 */
 

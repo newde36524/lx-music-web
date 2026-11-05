@@ -238,7 +238,11 @@
     display: flex;
     flex-flow: column nowrap;
     width: 100%;
-    background-color: var(--color-primary-light-300-alpha-700);
+    // 搜索框底色：用不透明白绿（--color-primary-light-600，opaque）代替原来的
+    // --color-primary-light-300-alpha-700（rgba(164,214,188,0.3) 半透明浅绿）。
+    // 半透明绿在白色页面上透出「雾感/模糊」，真机上被识别为顶部模糊；改不透明后
+    // 搜索框为实心浅绿（与激活态同色系），不再有雾感。
+    background-color: var(--color-primary-light-600);
     border-radius: @form-radius;
     transition:
       box-shadow 0.4s ease,

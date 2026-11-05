@@ -4,8 +4,6 @@
   import { playDetailLyricsMode } from '@/modules/playDetail/reactive.svelte'
   import { musicInfo } from '@/modules/player/reactive.svelte'
   import { fade } from 'svelte/transition'
-
-  let { introend }: { introend: boolean } = $props()
 </script>
 
 <div class="player-detail-main">
@@ -15,7 +13,7 @@
       <!-- 始终渲染封面（CoverSquare 内部根据纯歌词模式在「横幅」与「顶部小图标」之间做过渡动画），
            纯歌词模式下歌曲信息块由 Info 自行隐藏 -->
       <LeftInfo />
-      <RightLyric {introend} />
+      <RightLyric />
     </div>
   {/key}
 </div>

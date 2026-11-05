@@ -3,8 +3,6 @@
   import LyricPlayer from './LyricPlayer.svelte'
   import { lyricHorizontalSwipe, playDetailLyricsMode } from '@/modules/playDetail/reactive.svelte'
 
-  let { introend }: { introend: boolean } = $props()
-
   // 纯歌词模式下按住左滑/右滑 → 切回封面模式。
   // 歌词容器只做垂直滚动（touch-action: pan-y），横向手势不会被浏览器当作滚动消费，
   // 配合 setPointerCapture 保证手指移出容器也能收到 pointerup（与封面左滑手势一致）。
@@ -61,11 +59,12 @@
     lyricHorizontalSwipe.value = false
   }}
 >
-  {#if introend}
-    <div in:fade={{ delay: 5 }} class="right-lyric-content">
-      <LyricPlayer />
-    </div>
-  {/if}
+  <!-- 歌词内容不再用 introend 门控延迟到入场动画结束后才渲染：
+       入场时（封面飞入）就渲染，内容从进入页面起就可见（修复首屏底部空白）。
+       in:fade 保留：组件挂载（详情页打开）时做一次快速淡入。 -->
+  <div in:fade={{ delay: 5 }} class="right-lyric-content">
+    <LyricPlayer />
+  </div>
   <!-- 按住歌词时显示的「切换回封面」提示（左右滑动都可触发） -->
   <div class="lyric-hint" class:show={lyricPress}>← 切换回封面 →</div>
 </div>

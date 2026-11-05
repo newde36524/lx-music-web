@@ -20,6 +20,11 @@
     contain: strict;
     // transition: flex-basis @transition-normal;
 
+    // 注册为尺寸查询容器，让封面能用 cqh 按可用高度自适应缩放：
+    // 手机横屏（视口宽 > 900px 但很矮）时封面不再撑破布局（原封面 72% 宽超过主区高度，
+    // 被裁剪、并把歌曲信息块挤出视口、进度条不可见）。
+    container-type: size;
+
     --content-width: 72%;
 
     @media (max-width: @breakpoint-playdetail-mobile) {

@@ -86,6 +86,19 @@ html {
     animation: none !important;
   }
 }
+
+// iOS PWA 独立模式（添加到主屏幕）+ black-translucent：页面背景延伸到状态栏后方，
+// 但 100dvh 只返回「安全区」高度（不含顶部状态栏，比整屏矮一个 env(safe-area-inset-top)），
+// 导致应用比整屏矮、底部露出空白。补上 env(safe-area-inset-top) 让应用填满整屏，
+// 状态栏叠加在页面上、内容不被遮挡（背景仍延伸到状态栏后方）。
+// 仅在独立 App 模式（display-mode: standalone）生效；浏览器模式 100dvh 本身正确、
+// 桌面端/模拟器 env()=0 均无影响。
+@media (display-mode: standalone) {
+  html {
+    height: calc(100dvh + env(safe-area-inset-top, 0px));
+  }
+}
+
 // html, body {
 //   // overflow: hidden;
 //   box-sizing: border-box;

@@ -8,8 +8,6 @@
   import PlaylistBtn from '@/components/common/PlaylistBtn/index.svelte'
   import { fade } from 'svelte/transition'
 
-  let { introend }: { introend: boolean } = $props()
-
   // 窄屏（手机）只保留「随机 + 上一曲/播放/下一曲 + 播放列表」五个按钮（参照效果图），
   // 隐藏音效 / 倍速 / 评论 / 桌面歌词 / 收藏 / 音量等次要按钮；宽屏保持完整控制栏。
   // 需求：大尺寸页面的歌词详情页显示效果也和手机端一样 → 恒为移动端精简控制栏。
@@ -17,8 +15,11 @@
 </script>
 
 <div class="footer">
-  {#if introend}
-    <div in:fade={{ delay: 5 }} class="footer-content">
+  <!-- 播放栏内容不再用 introend 门控延迟到入场动画结束后才渲染：
+       入场时（封面飞入）就渲染，底部操作栏从进入页面起就贴合底部
+       （修复首屏底部有多余空白、需上下滑动才贴底的问题）。
+       in:fade 保留：组件挂载（详情页打开）时做一次快速淡入。 -->
+  <div in:fade={{ delay: 5 }} class="footer-content">
       <div class="control">
         {#if isSmall}
           <div class="side"><TogglePlayModeBtn /></div>
@@ -45,7 +46,6 @@
         <span>上滑可切换下一首</span>
       </div>
     </div>
-  {/if}
 </div>
 
 <style lang="less">

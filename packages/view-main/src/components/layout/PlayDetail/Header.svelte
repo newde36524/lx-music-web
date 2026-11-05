@@ -167,7 +167,9 @@
   @media (max-width: @breakpoint-playdetail-mobile) {
     .header {
       position: absolute;
-      top: 0;
+      // 顶部预留状态栏/刘海安全区（与 .play-detail 的 padding-top 一致），
+      // 让右上角关闭按钮下移到可操作位置（不被系统状态栏遮挡）。
+      top: env(safe-area-inset-top, 0px);
       left: 0;
       right: 0;
       z-index: 5;

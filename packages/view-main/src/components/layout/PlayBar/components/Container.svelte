@@ -53,9 +53,13 @@
     //   transition-property: opacity;
     // }
 
-    // 移动端收紧高度，给列表内容留出更多空间
+    // 移动端收紧高度，给列表内容留出更多空间。
+    // 真机底部 home indicator 安全区（env(safe-area-inset-bottom)，模拟器恒 0）未计入高度，
+    // 会导致播放条不贴合物理底部、底部露出空白（与 PlayDetail footer 同源问题）。
+    // 故把安全区计入 .player 高度（背景 .bg 覆盖到物理底边），内容盒用 .player-inner 的
+    // calc(100% - env(...)) 保持在上方，不被 home indicator 遮挡。
     @media (max-width: @breakpoint-mobile) {
-      height: 58px;
+      height: calc(58px + env(safe-area-inset-bottom, 0px));
     }
   }
   .bg {
@@ -79,7 +83,9 @@
     flex-flow: row nowrap;
     align-items: center;
     width: 100%;
-    height: 100%;
+    // 真机底部安全区（env(safe-area-inset-bottom)）从内容盒中扣除，让播放按钮/封面
+    // 保持在 home indicator 之上；模拟器 env()=0，退化为 height:100%（无变化）。
+    height: calc(100% - env(safe-area-inset-bottom, 0px));
     contain: strict;
     transition: @transition-normal;
     transition-property: opacity;

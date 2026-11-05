@@ -1,5 +1,6 @@
 import { createAudio } from '@/plugins/player'
 
+import { initFavicon } from './favicon'
 import { initMediaDevice } from './mediaDevice'
 // import usePlayStatus from './usePlayStatus'
 import { initMediaSessionInfo } from './mediaSessionInfo'
@@ -20,6 +21,7 @@ export const initPlayer = () => {
 
   initPlayerEvent()
   initSoundEffect()
+  initFavicon()
   initMediaDevice() // 初始化音频驱动输出设置
   initPlayerAudioContext()
   initMediaSessionInfo()

@@ -6,12 +6,16 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- 状态栏透明（配合 viewport-fit=cover 让页面背景延伸到全屏，状态栏叠加在页面之上）。
+         仅 iOS 添加到主屏幕（PWA）时生效；iOS Safari 浏览器模式忽略此标签。 -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <!-- iOS 添加到主屏幕后按独立 App 运行（全屏、可后台播放）。需要它配合 DOM 中的 <audio>
          与 MediaSession，iOS 才会在切到其它 App 后继续播放（否则音频被系统挂起）。 -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <!-- <meta name="theme-color" content="#fff" /> -->
+    <!-- 浏览器工具栏/状态栏颜色：主界面跟随应用背景色（setTheme 动态更新），
+         进入歌词详情页时由 PlayDetail 覆盖为深色（匹配顶部暗色蒙版，实现纯全屏）。 -->
+    <meta name="theme-color" content="#ffffff" />
   </head>
   <body id="body" style="background-color: transparent">
     <div id="root" style="display: none"></div>
@@ -54,7 +58,36 @@
             .map(([key, value]) => `${key}:${value};`)
             .join('')}}`
 
-          // document.querySelector('meta[name="theme-color"]')?.setAttribute('content', colors['--color-primary-light-1000'])
+          // 主界面工具栏/状态栏颜色跟随应用背景色（进入歌词详情页时由 PlayDetail 覆盖为深色）
+          const themeColorMeta = document.querySelector('meta[name="theme-color"]')
+          if (themeColorMeta && colors['--color-main-background']) {
+            themeColorMeta.setAttribute('content', colors['--color-main-background'])
+          }
+        }
+        // iOS PWA 独立模式（添加到主屏幕）+ black-translucent：100dvh/innerHeight 只返回
+        // 「安全区」高度、不含顶部状态栏，导致应用比整屏矮、底部露出空白。CSS 的
+        // @media (display-mode: standalone) 修复在部分情况下不生效（display-mode 未匹配），
+        // 这里用 navigator.standalone（iOS PWA 最可靠的标志）直接补高度：
+        // 默认取整屏高 screen.height（含状态栏叠加区）；键盘弹出时（可见视口明显小于整屏）
+        // 改用 visualViewport.height 动态收缩，避免内容被键盘遮挡。
+        // 仅在独立 App 模式执行；浏览器模式/桌面/模拟器无影响。
+        const isStandalone =
+          window.navigator.standalone === true ||
+          window.matchMedia('(display-mode: standalone)').matches ||
+          window.matchMedia('(display-mode: fullscreen)').matches
+        if (isStandalone) {
+          const fixPwaHeight = () => {
+            const el = document.documentElement
+            const sh = window.screen?.height
+            const vv = window.visualViewport?.height
+            let h = sh
+            if (vv && sh && vv < sh - 80) h = vv
+            if (h) el.style.height = `${h}px`
+          }
+          fixPwaHeight()
+          window.addEventListener('resize', fixPwaHeight)
+          window.addEventListener('orientationchange', fixPwaHeight)
+          window.visualViewport?.addEventListener('resize', fixPwaHeight)
         }
         //<%- envScript %>
       }

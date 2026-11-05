@@ -13,8 +13,9 @@
   let isMsDown = $state(false)
   let isStopScroll = $state(false)
   let timeStr = $state('--/--')
-  // 小屏上继续按 1020 的比例缩小，歌词会小到读不清，所以给缩放比设一个下限
-  const MIN_WIN_RADIO = 0.6
+  // 小屏上继续按 1020 的比例缩小，歌词会小到读不清，所以给缩放比设一个下限。
+  // 移动端按效果图放大歌词（0.6 -> 0.8），避免默认字号过小。
+  const MIN_WIN_RADIO = 0.8
   const getWinRadio = () => Math.max(document.getElementById('root')!.clientWidth / 1020, MIN_WIN_RADIO)
   let winRadio = $state(getWinRadio())
   const textAlign = useSettingValue('playDetail.style.align')
@@ -112,9 +113,6 @@
     overflow: hidden;
     font-size: var(--play-detail-lrc-font-size, 16px);
     cursor: grab;
-    /* stylelint-disable-next-line property-no-vendor-prefix */
-    -webkit-mask-image: linear-gradient(transparent 0%, #fff 20%, #fff 80%, transparent 100%);
-    mask-image: linear-gradient(transparent 0%, #fff 20%, #fff 80%, transparent 100%);
     &.draging {
       cursor: grabbing;
     }
@@ -129,10 +127,7 @@
         line-height: 1.2;
         color: @unplay-color;
         overflow-wrap: break-word;
-        text-shadow:
-          0 0 2px var(--color-primary-light-100-alpha-900),
-          0 0 3px var(--color-primary-light-100-alpha-900),
-          0 0 4px var(--color-primary-dark-700-alpha-900);
+        text-shadow: none;
         transition: @transition-slow !important;
         transition-property: padding, transform !important;
 
@@ -157,22 +152,27 @@
         }
         &.line-mode.active .font-lrc,
         &.font-mode.played .font-lrc {
-          color: @played-color;
+          // 已播放/当前行文字：纯白（背景填充色也是纯白，这里作 fallback）
+          color: #fff;
         }
         &.font-mode .extended .font-lrc {
           transition: @transition-slow;
           transition-property: color;
         }
 
+        // 逐字变色歌词（保留）：background-clip:text + 透明填充的渐变染色特效，
+        // 播放时文字按字符逐个染成纯白色（未播放 = 中性灰、已播放 = 纯白），
+        // 无阴影、无透明度。span 会继承 PlayDetail 的 :global * text-shadow，这里显式去掉。
         &.font-mode > .line > .font-lrc {
           > span {
             font-size: 1em;
-            background-color: @unplay-font-color;
-            /* stylelint-disable-next-line value-no-vendor-prefix */
-            background-image: -webkit-linear-gradient(top, @played-color, @played-color);
-            background-image: linear-gradient(to bottom, @played-color, @played-color);
+            text-shadow: none;
+            // 未播放底色：中性灰（与已播放纯白形成逐字变色对比）
+            background-color: var(--color-400);
+            // 已播放填充色：纯白（原为 @played-color 主题主色，按需求改为纯白）
+            background-image: -webkit-linear-gradient(top, #fff, #fff);
+            background-image: linear-gradient(to bottom, #fff, #fff);
             background-repeat: no-repeat;
-            /* stylelint-disable-next-line property-no-vendor-prefix */
             -webkit-background-clip: text;
             background-clip: text;
             background-size: 0 100%;
@@ -208,13 +208,6 @@
         &.active {
           padding-top: calc(var(--play-detail-lrc-font-size, 16px) * 1.3);
           padding-bottom: calc(var(--play-detail-lrc-font-size, 16px) * 1.3);
-          transform: scale(1.1);
-          // .extended {
-          //   // font-size: 1em;
-          // }
-          // .line {
-          //   // font-size: 1.2em;
-          // }
         }
       }
     }
@@ -321,29 +314,26 @@
     height: 60%;
   }
 
-  // 移动端：参照效果图 —— 背景是高斯模糊封面（叠暗色罩，偏深），
-  // 当前播放歌词为白色大字，其余歌词为浅灰小字，形成对比。
-  // 桌面端背景为壁纸（可深可浅），保留原光晕与主题色以维持可读性。
-  @media (max-width: @breakpoint-playdetail-mobile) {
+  // 移动端：参照效果图 —— 背景是高斯模糊封面（叠暗色罩，偏深）。
+  // 纯色歌词：未播放 = 浅灰（--color-400），已播放/当前行 = 主题主色（@played-color，随设置变化）。
+  // 无阴影、无透明度、无渐变染色特效。
+  @media (max-width: @breakpoint-mobile) {
     .lyric {
       :global {
         // 去掉歌词光晕阴影（曾让歌词发糊）
         .line-content,
         .font-lrc {
           text-shadow: none;
-          // 未播放歌词：浅灰，弱于当前播放行的白色
+          // 未播放歌词：浅灰，弱于当前播放行
           color: var(--color-400);
         }
         .line-content.font-mode {
           color: var(--color-400);
         }
-        // 当前播放行：白色 + 放大（参照效果图）
+        // 当前/已播放行：纯白（原为 @played-color 主题主色，按需求改为纯白）
         .line-mode.active .font-lrc,
         .font-mode.played .font-lrc {
           color: #fff;
-        }
-        .line-content.active {
-          transform: scale(1.2);
         }
       }
     }

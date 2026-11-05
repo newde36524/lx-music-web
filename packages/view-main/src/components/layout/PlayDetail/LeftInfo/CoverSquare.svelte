@@ -136,7 +136,13 @@
     class:dragging={dragging}
     style:transform={`translate(${viewX}px, ${viewY}px) scale(${pressed ? PRESS_SCALE : 1})`}
   >
-    <Image src={pic} />
+    <!-- 封面遮罩分两层（单层多段渐变在部分浏览器/渲染下不生效）：
+         1) .cover-scale 负责顶部淡出（含头部区域完全透明，露出深色背景，头部不是白底）；
+         2) .pic-wrap 负责底部淡出（融入背后的高斯模糊背景）。
+         歌手/专辑名叠加层（.cover-overlay）不包进 .pic-wrap，保持不透明可读。 -->
+    <div class="pic-wrap">
+      <Image src={pic} />
+    </div>
     <!-- 移动端沉浸式「歌词页」：在封面横幅底部叠加歌手 / 专辑名 -->
     <div class="cover-overlay">
       <span class="cover-singer">{$musicInfo.singer}</span>
@@ -156,7 +162,10 @@
   .cover {
     position: relative;
     flex: none;
-    width: var(--content-width);
+    // 封面宽度：不超过内容宽度（--content-width），且在横屏/矮视口下按可用高度收缩
+    // （100cqh = .left-info 内容高度；预留 ~100px 给封面下方的歌曲信息块），
+    // 避免封面超过主区高度被裁剪、把信息块/进度条挤出视口（手机横屏问题）。
+    width: min(var(--content-width), calc(100cqh - 100px));
     aspect-ratio: 1 / 1;
     contain: strict;
   }
@@ -173,6 +182,12 @@
     transition: transform 0.15s ease;
     &.dragging {
       transition: none; // 拖动时立即跟随手指
+    }
+
+    // 封面图片包裹层：负责底部淡出遮罩（见移动端媒体查询），铺满可视封面区域。
+    .pic-wrap {
+      position: absolute;
+      inset: 0;
     }
 
     :global {
@@ -263,6 +278,10 @@
       aspect-ratio: auto;
       align-self: center; // 宽度收缩时保持水平居中
       contain: none; // 取消 contain，让缩放/位移的封面能露出四周空位
+      // 封面盖在歌词上方：歌词向上滚动时顶部行被封面挡住（不再流出半截），
+      // 底边用负 margin 下移一小段覆盖歌词区顶部，遮住被裁剪的半行。
+      z-index: 2;
+      margin-bottom: -24px;
       transition:
         flex-basis 0.28s ease,
         width 0.28s ease,
@@ -274,15 +293,8 @@
       box-shadow: none;
       background-color: transparent; // 底部不再铺深色块，背景交给高斯模糊页面背景
 
-      // 封面改为「透明度渐变」：上下边缘都用遮罩让封面在边缘完全透明（替代原白色渐变），
-      // 透出背后的高斯模糊背景，使封面与背景在上下两端都相融（需求：上边和下边一样做透明度渐变）。
-      // 顶部渐变稍小于底部（35% vs 45%），避免把封面图里的专辑名也一并淡掉；
-      // 歌手/专辑名叠加层（.cover-overlay）不受遮罩影响。
-      // （遮罩只作用在 .pic 上，.cover-overlay 是独立元素，保持不透明可读）
-      .cover:not(.lyrics-mode) & :global(.pic) {
-        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 35%, black 55%, transparent 100%);
-        mask-image: linear-gradient(to bottom, transparent 0%, black 35%, black 55%, transparent 100%);
-      }
+      /* 上下边缘透明度渐变：顶部和底部 20px 内渐隐到透明 */
+
     }
     .cover-overlay {
       position: absolute;
@@ -321,6 +333,8 @@
       flex-basis: 56px;
       width: 56px;
       height: 56px;
+      // 小图标不覆盖歌词（横幅才向下覆盖歌词区顶部）
+      margin-bottom: 0;
 
       .cover-scale {
         border-radius: 8px;

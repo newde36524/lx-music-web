@@ -49,4 +49,12 @@
     //   // z-index: -1;
     // }
   }
+
+  // 移动端：顶部预留状态栏/刘海安全区，把工具栏（含搜索框）下移到可操作位置，
+  // 避免被系统状态栏遮挡。PlayDetail 是 #app-main 的兄弟节点，不受影响（保持沉浸式全屏）。
+  @media (max-width: @breakpoint-mobile) {
+    #app-right {
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+  }
 </style>
